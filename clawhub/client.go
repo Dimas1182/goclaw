@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os/exec"
+	"runtime"
 	"time"
 )
 
@@ -420,5 +422,54 @@ func BuildSkillURL(baseURL, slug string) string {
 
 // BuildAuthURL builds an authorization URL for browser login
 func BuildAuthURL(siteURL, state string) string {
-	return fmt.Sprintf("%s/auth/authorize?state=%s", siteURL, state)
+	return fmt.Sprintf("%s/auth/authorize?state=%s&response_type=token&client_id=cli", siteURL, state)
+}
+
+// BuildTokenExchangeURL builds the token exchange URL
+func BuildTokenExchangeURL(siteURL string) string {
+	return fmt.Sprintf("%s/auth/token", siteURL)
+}
+
+// PollTokenResponse represents the response from token polling
+type PollTokenResponse struct {
+	Token   string `json:"token"`
+	Expires int    `json:"expires_in"`
+	UserID  string `json:"user_id"`
+}
+
+// DeviceAuthResponse represents device authorization response
+type DeviceAuthResponse struct {
+	DeviceCode      string `json:"device_code"`
+	UserCode        string `json:"user_code"`
+	VerificationURL string `json:"verification_url"`
+	ExpiresIn       int    `json:"expires_in"`
+	Interval        int    `json:"interval"`
+}
+
+// OpenBrowser opens the default web browser to the specified URL
+func OpenBrowser(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+		// No additional args needed on macOS
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
+}
+
+// InitiateBrowserAuth initiates browser-based authentication
+// Returns the authorization URL and a state parameter for CSRF protection
+func (c *Client) InitiateBrowserAuth() (string, string, error) {
+	state := fmt.Sprintf("cli-%d", time.Now().UnixNano())
+	authURL := BuildAuthURL(c.baseURL, state)
+	return authURL, state, nil
 }

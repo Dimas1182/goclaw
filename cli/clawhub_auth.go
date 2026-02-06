@@ -68,14 +68,27 @@ func runLogin(cmd *cobra.Command, args []string) {
 		// Browser flow
 		printInfo("Opening browser for authentication...")
 
-		siteURL := clawhub.GetSiteURL(cfg)
-		authURL := clawhub.BuildAuthURL(siteURL, "cli-auth")
+		client := clawhub.NewClient(clawhub.GetRegistryURL(cfg), "")
+		authURL, _, err := client.InitiateBrowserAuth()
+		if err != nil {
+			printError("Failed to initiate authentication: %v", err)
+			os.Exit(1)
+		}
 
-		printInfo("Visit: %s", authURL)
-		printInfo("After authentication, paste your token below:")
+		// Open browser
+		if err := clawhub.OpenBrowser(authURL); err != nil {
+			printWarning("Failed to open browser automatically: %v", err)
+			printInfo("Please visit this URL in your browser:")
+			fmt.Printf("  %s\n", authURL)
+		} else {
+			printInfo("Browser opened. Complete the authentication there.")
+		}
 
-		// In a real implementation, we would open the browser here
-		// For now, just prompt for the token
+		fmt.Println()
+		printInfo("After authentication, you will receive a token.")
+		printInfo("Paste the token below:")
+
+		// Prompt for the token
 		token = prompt("Token")
 		if token == "" {
 			printError("Token is required")
