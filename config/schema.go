@@ -133,11 +133,22 @@ type FileSystemToolConfig struct {
 
 // ShellToolConfig Shell 工具配置
 type ShellToolConfig struct {
-	Enabled       bool     `mapstructure:"enabled" json:"enabled"`
-	AllowedCmds   []string `mapstructure:"allowed_cmds" json:"allowed_cmds"`
-	DeniedCmds    []string `mapstructure:"denied_cmds" json:"denied_cmds"`
-	Timeout       int      `mapstructure:"timeout" json:"timeout"`
-	WorkingDir    string   `mapstructure:"working_dir" json:"working_dir"`
+	Enabled       bool           `mapstructure:"enabled" json:"enabled"`
+	AllowedCmds   []string       `mapstructure:"allowed_cmds" json:"allowed_cmds"`
+	DeniedCmds    []string       `mapstructure:"denied_cmds" json:"denied_cmds"`
+	Timeout       int            `mapstructure:"timeout" json:"timeout"`
+	WorkingDir    string         `mapstructure:"working_dir" json:"working_dir"`
+	Sandbox       SandboxConfig  `mapstructure:"sandbox" json:"sandbox"`
+}
+
+// SandboxConfig Docker 沙箱配置
+type SandboxConfig struct {
+	Enabled    bool   `mapstructure:"enabled" json:"enabled"`
+	Image      string `mapstructure:"image" json:"image"`
+	Workdir    string `mapstructure:"workdir" json:"workdir"`
+	Remove     bool   `mapstructure:"remove" json:"remove"`
+	Network    string `mapstructure:"network" json:"network"`
+	Privileged bool   `mapstructure:"privileged" json:"privileged"`
 }
 
 // WebToolConfig Web 工具配置

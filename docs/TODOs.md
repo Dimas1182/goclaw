@@ -3,12 +3,12 @@
 Inspired by advanced agent frameworks like `openclaw` and `nanobot`, here are the planned enhancements for `goclaw`.
 
 ## 🛡️ Security & Reliability
-- [x] **Docker Sandboxing**: Implement a Docker-based executor for the `ShellTool` to isolate command execution from the host system.
+- [ ] **Docker Sandboxing**: Implement a Docker-based executor for the `ShellTool` to isolate command execution from the host system.
 - [ ] **Enhanced Whitelisting**: Granular permission controls for filesystem and network access based on the current task context.
 - [ ] **Secret Scanning**: Prevent the agent from reading or accidentally leaking sensitive environment variables or configuration files.
 
 ## 🌐 Web & Browser Capabilities
-- [ ] **Headless Browser Integration**: Integrate `chromedp` or `playwright-go` to handle SPA (Single Page Applications) and interactive web tasks.
+- [x] **Headless Browser Integration**: Integrate `chromedp` or `playwright-go` to handle SPA (Single Page Applications) and interactive web tasks.
 - [ ] **Readability Mode**: Implement an improved HTML-to-Markdown converter using a readability-style algorithm for cleaner web content extraction.
 - [ ] **Proxy Support**: Support for configurable proxies in web search and fetch tools.
 

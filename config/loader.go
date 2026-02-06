@@ -77,6 +77,12 @@ func setDefaults(v *viper.Viper) {
 	// 工具默认配置
 	v.SetDefault("tools.shell.enabled", true)
 	v.SetDefault("tools.shell.timeout", 120)
+	v.SetDefault("tools.shell.sandbox.enabled", false)
+	v.SetDefault("tools.shell.sandbox.image", "goclaw/sandbox:latest")
+	v.SetDefault("tools.shell.sandbox.workdir", "/workspace")
+	v.SetDefault("tools.shell.sandbox.remove", true)
+	v.SetDefault("tools.shell.sandbox.network", "none")
+	v.SetDefault("tools.shell.sandbox.privileged", false)
 	v.SetDefault("tools.web.search_engine", "travily")
 	v.SetDefault("tools.web.timeout", 10)
 	v.SetDefault("tools.browser.enabled", false)

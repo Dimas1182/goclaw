@@ -112,6 +112,7 @@ func runChat(cmd *cobra.Command, args []string) {
 		cfg.Tools.Shell.DeniedCmds,
 		cfg.Tools.Shell.Timeout,
 		cfg.Tools.Shell.WorkingDir,
+		cfg.Tools.Shell.Sandbox,
 	)
 	for _, tool := range shellTool.GetTools() {
 		_ = toolRegistry.Register(tool)
