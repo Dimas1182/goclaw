@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/smallnest/dogclaw/goclaw/agent/tools"
@@ -26,20 +27,29 @@ type Loop struct {
 	workspace    string
 	maxIteration int
 	running      bool
+
+	// 重试和错误处理
+	errorClassifier *ErrorClassifier
+	retryPolicy     RetryPolicy
+
+	// 反思机制
+	reflector *Reflector
 }
 
 // Config Loop 配置
 type Config struct {
-	Bus          *bus.MessageBus
-	Provider     providers.Provider
-	SessionMgr   *session.Manager
-	Memory       *MemoryStore
-	Context      *ContextBuilder
-	Tools        *tools.Registry
-	SkillsLoader *SkillsLoader
-	Subagents    *SubagentManager
-	Workspace    string
-	MaxIteration int
+	Bus           *bus.MessageBus
+	Provider      providers.Provider
+	SessionMgr    *session.Manager
+	Memory        *MemoryStore
+	Context       *ContextBuilder
+	Tools         *tools.Registry
+	SkillsLoader  *SkillsLoader
+	Subagents     *SubagentManager
+	Workspace     string
+	MaxIteration  int
+	RetryConfig   *RetryConfig
+	ReflectionCfg *ReflectionConfig
 }
 
 // NewLoop 创建 Agent 循环
@@ -48,18 +58,28 @@ func NewLoop(cfg *Config) (*Loop, error) {
 		cfg.MaxIteration = 15
 	}
 
+	// 创建错误分类器和重试策略
+	errorClassifier := NewErrorClassifier()
+	retryPolicy := NewDefaultRetryPolicy(cfg.RetryConfig)
+
+	// 创建反思器
+	reflector := NewReflector(cfg.ReflectionCfg, cfg.Provider, cfg.Workspace)
+
 	return &Loop{
-		bus:          cfg.Bus,
-		provider:     cfg.Provider,
-		sessionMgr:   cfg.SessionMgr,
-		memory:       cfg.Memory,
-		context:      cfg.Context,
-		tools:        cfg.Tools,
-		skillsLoader: cfg.SkillsLoader,
-		subagents:    cfg.Subagents,
-		workspace:    cfg.Workspace,
-		maxIteration: cfg.MaxIteration,
-		running:      false,
+		bus:             cfg.Bus,
+		provider:        cfg.Provider,
+		sessionMgr:      cfg.SessionMgr,
+		memory:          cfg.Memory,
+		context:         cfg.Context,
+		tools:           cfg.Tools,
+		skillsLoader:    cfg.SkillsLoader,
+		subagents:       cfg.Subagents,
+		workspace:       cfg.Workspace,
+		maxIteration:    cfg.MaxIteration,
+		running:         false,
+		errorClassifier: errorClassifier,
+		retryPolicy:     retryPolicy,
+		reflector:       reflector,
 	}, nil
 }
 
@@ -141,19 +161,30 @@ func (l *Loop) processMessage(ctx context.Context, msg *bus.InboundMessage) {
 		Timestamp: msg.Timestamp,
 	})
 
-	// 运行 Agent 迭代
-	response, err := l.runIteration(ctx, sess)
+	// 运行 Agent 迭代（带重试）
+	response, err := l.runIterationWithRetry(ctx, sess, msg.Content)
 	if err != nil {
 		logger.Error("Agent iteration failed", zap.Error(err))
 
-		// 发送错误消息
-		_ = l.bus.PublishOutbound(ctx, &bus.OutboundMessage{
-			Channel:   msg.Channel,
-			ChatID:    msg.ChatID,
-			Content:   fmt.Sprintf("抱歉，处理您的请求时出错：%v", err),
-			Timestamp: time.Now(),
-		})
-		return
+		// 检查是否需要上下文压缩
+		if IsContextOverflowError(err.Error()) {
+			logger.Info("Attempting context compression...")
+			l.compressSession(sess)
+			// 重试一次
+			response, err = l.runIterationWithRetry(ctx, sess, msg.Content)
+		}
+
+		if err != nil {
+			// 格式化错误消息
+			userError := FormatErrorForUser(err.Error())
+			_ = l.bus.PublishOutbound(ctx, &bus.OutboundMessage{
+				Channel:   msg.Channel,
+				ChatID:    msg.ChatID,
+				Content:   fmt.Sprintf("抱歉，处理您的请求时出错：%s", userError),
+				Timestamp: time.Now(),
+			})
+			return
+		}
 	}
 
 	// 发送响应
@@ -223,10 +254,58 @@ func (l *Loop) processSystemMessage(ctx context.Context, msg *bus.InboundMessage
 	}
 }
 
-// runIteration 运行 Agent 迭代
-func (l *Loop) runIteration(ctx context.Context, sess *session.Session) (string, error) {
+// runIterationWithRetry 使用重试机制运行 Agent 迭代
+func (l *Loop) runIterationWithRetry(ctx context.Context, sess *session.Session, userRequest string) (string, error) {
+	var result string
+	var lastErr error
+
+	attempt := 0
+	maxAttempts := 3
+
+	for attempt < maxAttempts {
+		attempt++
+		logger.Info("Agent iteration attempt", zap.Int("attempt", attempt))
+
+		result, lastErr = l.runIteration(ctx, sess, userRequest)
+		if lastErr == nil {
+			return result, nil
+		}
+
+		// 检查是否应该重试
+		shouldRetry, reason := l.retryPolicy.ShouldRetry(attempt, lastErr)
+		if !shouldRetry {
+			logger.Warn("No retry possible",
+				zap.Int("attempt", attempt),
+				zap.String("reason", string(reason)),
+				zap.Error(lastErr))
+			break
+		}
+
+		// 获取重试延迟
+		delay := l.retryPolicy.GetDelay(attempt, reason)
+		logger.Warn("Retrying after error",
+			zap.Int("attempt", attempt),
+			zap.String("reason", string(reason)),
+			zap.Duration("delay", delay),
+			zap.Error(lastErr))
+
+		// 等待延迟
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
+		case <-time.After(delay):
+			continue
+		}
+	}
+
+	return "", fmt.Errorf("failed after %d attempts: %w", attempt, lastErr)
+}
+
+// runIteration 运行 Agent 迭代（带反思机制）
+func (l *Loop) runIteration(ctx context.Context, sess *session.Session, userRequest string) (string, error) {
 	iteration := 0
 	var lastResponse string
+	var continuePrompt string
 
 	// 获取已加载的技能名称（从会话元数据中）
 	loadedSkills := l.getLoadedSkills(sess)
@@ -244,7 +323,7 @@ func (l *Loop) runIteration(ctx context.Context, sess *session.Session) (string,
 
 		// 构建上下文
 		history := sess.GetHistory(50)
-		messages := l.context.BuildMessages(history, "", skills, loadedSkills)
+		messages := l.context.BuildMessages(history, continuePrompt, skills, loadedSkills)
 
 		providerMessages := make([]providers.Message, len(messages))
 		for i, msg := range messages {
@@ -319,8 +398,10 @@ func (l *Loop) runIteration(ctx context.Context, sess *session.Session) (string,
 			// 执行工具调用
 			hasNewSkill := false
 			for _, tc := range response.ToolCalls {
-				result, err := l.tools.Execute(ctx, tc.Name, tc.Params)
+				result, err := l.executeToolWithRetry(ctx, tc.Name, tc.Params)
 				if err != nil {
+					// 工具执行错误不应该终止整个迭代
+					// 将错误信息作为工具结果返回给 LLM
 					result = fmt.Sprintf("Error: %v", err)
 				}
 
@@ -370,7 +451,35 @@ func (l *Loop) runIteration(ctx context.Context, sess *session.Session) (string,
 			continue
 		}
 
-		// 没有工具调用，返回响应
+		// 没有工具调用，检查任务是否完成
+		if l.reflector != nil && l.reflector.config.Enabled {
+			// 获取当前对话历史进行反思
+			reflectionHistory := sess.GetHistory(30)
+
+			reflection, reflectErr := l.reflector.Reflect(ctx, userRequest, reflectionHistory)
+			if reflectErr != nil {
+				logger.Warn("Reflection check failed, continuing without reflection", zap.Error(reflectErr))
+			} else {
+				// 根据反思结果决定是否继续
+				if l.reflector.ShouldContinueIteration(reflection, iteration, l.maxIteration) {
+					// 任务未完成，生成继续提示并继续迭代
+					continuePrompt = l.reflector.GenerateContinuePrompt(reflection)
+					logger.Info("Task not yet complete, continuing",
+						zap.String("status", string(reflection.Status)),
+						zap.Float64("confidence", reflection.Confidence),
+						zap.Int("remaining_steps", len(reflection.RemainingSteps)))
+					continue
+				} else {
+					// 任务完成或达到其他停止条件
+					logger.Info("Task completion check",
+						zap.String("status", string(reflection.Status)),
+						zap.Float64("confidence", reflection.Confidence),
+						zap.String("reasoning", reflection.Reasoning))
+				}
+			}
+		}
+
+		// 没有工具调用且任务完成，返回响应
 		lastResponse = response.Content
 		break
 	}
@@ -380,6 +489,89 @@ func (l *Loop) runIteration(ctx context.Context, sess *session.Session) (string,
 	}
 
 	return lastResponse, nil
+}
+
+// executeToolWithRetry 使用重试机制执行工具
+func (l *Loop) executeToolWithRetry(ctx context.Context, toolName string, params map[string]interface{}) (string, error) {
+	var result string
+	var err error
+
+	attempt := 0
+	maxAttempts := 2 // 工具执行最多重试 2 次
+
+	for attempt < maxAttempts {
+		attempt++
+
+		result, err = l.tools.Execute(ctx, toolName, params)
+		if err == nil {
+			return result, nil
+		}
+
+		// 检查错误类型
+		errMsg := strings.ToLower(err.Error())
+
+		// 网络相关错误可以重试
+		if strings.Contains(errMsg, "timeout") ||
+			strings.Contains(errMsg, "network") ||
+			strings.Contains(errMsg, "connection") ||
+			strings.Contains(errMsg, "temporary") {
+
+			logger.Warn("Tool execution failed, retrying",
+				zap.String("tool", toolName),
+				zap.Int("attempt", attempt),
+				zap.Error(err))
+
+			// 短暂延迟后重试
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(time.Duration(attempt) * time.Second):
+				continue
+			}
+		}
+
+		// 其他错误不重试
+		break
+	}
+
+	return "", fmt.Errorf("tool execution failed: %w", err)
+}
+
+// compressSession 压缩会话历史
+func (l *Loop) compressSession(sess *session.Session) {
+	originalCount := len(sess.Messages)
+
+	// 保留最近的 10 轮对话
+	if originalCount > 20 {
+		// 保留系统消息
+		var systemMessages []session.Message
+		var recentMessages []session.Message
+		turnCount := 0
+
+		for i := len(sess.Messages) - 1; i >= 0; i-- {
+			msg := sess.Messages[i]
+
+			if msg.Role == "system" {
+				systemMessages = append([]session.Message{msg}, systemMessages...)
+				continue
+			}
+
+			if msg.Role == "user" {
+				turnCount++
+				if turnCount > 10 {
+					break
+				}
+			}
+
+			recentMessages = append([]session.Message{msg}, recentMessages...)
+		}
+
+		sess.Messages = append(systemMessages, recentMessages...)
+
+		logger.Info("Session compressed",
+			zap.Int("original_count", originalCount),
+			zap.Int("compressed_count", len(sess.Messages)))
+	}
 }
 
 // getLoadedSkills 从会话中获取已加载的技能名称

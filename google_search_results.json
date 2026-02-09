@@ -1,66 +1,66 @@
 {
-  "query": "openclaw site:google.com",
+  "query": "openclaw site:openclaw.org OR site:github.com OR site:medium.com OR site:twitter.com after:2026-02-02",
   "total_results": 10,
   "results": [
     {
-      "title": "OpenClaw Copilot - Chrome Web Store",
-      "link": "https://chromewebstore.google.com/detail/openclaw-copilot/bfpnaggikhabdgbnhnngdfldkbinncdf",
-      "description": "4天前—Experience the future of browsing with OpenClaw Copilot,a powerful third-party OpenClaw Chrome extensionthat integrates your personal AI ...",
-      "site_name": "Chrome Web Store"
+      "title": "Running OpenClaw Without Burning Money, Quotas, or ...",
+      "link": "https://gist.github.com/digitalknk/ec360aab27ca47cb4106a183b2c25a98",
+      "description": "1天前—OpenClaw is useful, but most of the pain people run into comes from letting one model do everything, chasing hype, or running expensive models in places ...",
+      "site_name": "Gist"
     },
     {
-      "title": "OpenClaw: The AI Agent Revolution: Turn Intelligent ...",
-      "link": "https://books.google.com/books/about/OpenClaw_The_AI_Agent_Revolution.html?id=E3q_EQAAQBAJ",
-      "description": "1天前—Leverage OpenClaw features tointegrate AI with apps, APIs, and smart home systems. Monitor, maintain, and optimize agents for continuous ...",
-      "site_name": "Google Books"
+      "title": "VoltAgent/awesome-openclaw-skills",
+      "link": "https://github.com/VoltAgent/awesome-openclaw-skills",
+      "description": "3天前—OpenClaw (previously known as Moltbot, originally Clawdbot... identity crisis included, no extra charge)is a locally-running AI assistantthat operates ...",
+      "site_name": "GitHub"
     },
     {
-      "title": "Openclaw Creator's Dangerous AI Code Workflow",
-      "link": "https://www.google.com/sorry/index?continue=https://m.youtube.com/shorts/NDJCam-oHU4&q=EgRC-UIHGOby_csGIjA0nBPGbCLTbiDYURRPj8OOgycUVGX6th_EaUJ0jwEXn5sduRAWFx32Pis-0Zgx6BYyBz5qY25kclJaAUM",
-      "description": "OpenclawCreator's Dangerous AI Code Workflow. 490. Dislike. 22. Share. Video unavailable. This content isn't available. Skip video.",
-      "site_name": "YouTube · Better Stack"
+      "title": "OpenClaw (formerly Clawdbot): A Deep Dive into Running ...",
+      "link": "https://medium.com/algomart/openclaw-formerly-clawdbot-a-deep-dive-into-running-your-own-24-7-ai-assistant-on-a-vps-60aac37c9703",
+      "description": "Instead of being another web‑based chatbot,OpenClawis a self‑hosted, always‑running AI automation gateway. It connects large language models (LLMs) directly ...",
+      "site_name": "Medium · Yash Jain"
     },
     {
-      "title": "Clawd → Moltbot → OpenClaw: Why This AI Assistant ...",
-      "link": "https://www.google.com/sorry/index?continue=https://m.youtube.com/shorts/pYbo28bo-bQ&q=EgRC-ULJGLe38csGIjDQCml6NUVFLrwCZE29BZ4C1vnKi0_ynofRpSwVjZYdtmyqFbPvSbTaNq3iSKt73XgyBz5qY25kclJaAUM",
-      "description": "2026年1月29日—What is Clawdbot and why did it becomeOpenClaw? This AI project started as Clawd, evolved into Moltbot, and now officially lives on asOpenClaw...",
-      "site_name": "google.com"
+      "title": "OpenClaw: What It Is and Isn't",
+      "link": "https://medium.com/@tjlsmith0831/openclaw-what-it-is-and-isnt-fcb6260594d1",
+      "description": "Install and Configure OpenClaw:Install required runtimes and the OpenClaw CLI. Run the onboarding wizard to configure models, channels, and daemon ...",
+      "site_name": "Medium"
     },
     {
-      "title": "ClawTalk - Chrome Web Store",
-      "link": "https://chromewebstore.google.com/detail/clawtalk/gikeofofahfdgnhobaomjdngcimemoge?hl=en",
-      "description": "4天前—ClawTalk is a lightweight Chrome Extension that transforms yourOpenClawGateway into an always-available, voice-enabled AI assistant interface ...",
-      "site_name": "Chrome Web Store"
+      "title": "cloudflare/moltworker: Run OpenClaw, (formerly Moltbot, ...",
+      "link": "https://github.com/cloudflare/moltworker",
+      "description": "6天前—This project packagesOpenClaw to run in a Cloudflare Sandbox container, providing a fully managed, always-on deployment without needing to self-host. Optional ...",
+      "site_name": "GitHub"
     },
     {
-      "title": "OpenClaw Mac Mini",
-      "link": "https://www.google.com/sorry/index?continue=https://m.youtube.com/shorts/7gZjPmvjIso&q=EgRC-UIlGKWXgcwGIjDB56nnuvE4vgP5ujLUyntXBLgPXETP0Wo_p_Kzj0E_Q9h1ZNDjW4PLWe6Q2LSF0KIyBz5qY25kclJaAUM",
-      "description": "Share your videos with friends, family, and the world.",
-      "site_name": "YouTube · Anima Odyssey"
+      "title": "OpenClaw🦞 (@openclaw) / Posts / X",
+      "link": "https://twitter.com/openclaw?ref_src=twsrc%5Etfw",
+      "description": "The AI that does things.Emails, calendar, home automation, from your favorite chat app. Your machine, your rules. New shell, same lobster soul.",
+      "site_name": "twitter.com"
     },
     {
-      "title": "Bits and Bobs 2/2/26",
-      "link": "https://groups.google.com/g/komoroske-updates/c/FgQ3bWxwVGA",
-      "description": "7天前—OpenClaw shows the raw power of LLMswhen unleashed on your data. It's also self evidently, absurdly, catastrophically insecure. A friend ...",
-      "site_name": "Google Groups"
+      "title": "OpenClaw Demystified: From Installation to Architecture",
+      "link": "https://medium.com/@gohsoonheng00/openclaw-demystified-from-installation-to-architecture-29dd2580ed42",
+      "description": "OpenClaw isa powerful open-source AI assistantthat's safe to use if you stick to trusted skills and take basic precautions. Treat it like any flexible tool — ...",
+      "site_name": "Medium"
     },
     {
-      "title": "The New Edge in VC",
-      "link": "https://www.google.com/sorry/index?continue=https://m.youtube.com/shorts/pr5tSJb30q8&q=EgRC-ULIGNXRhMwGIjDWENiHGMWv_YVqHlNzqNuy7pMNeTKVh1d6ySh4zp8hAFJQYEGCtqElVMYaWzYWlR8yBz5qY25kclJaAUM",
-      "description": "6天前—@theinformation. Subscribe. Inside theOpenClaw& Moltbook Craze, SpaceX's FCC Filing for Orbital Data Centers. The New Edge in VC. Like.",
-      "site_name": "google.com"
+      "title": "OpenClaw: The Local-first personal AI assistant you run ...",
+      "link": "https://medium.com/coding-nexus/openclaw-the-local-first-personal-ai-assistant-you-run-yourself-caed6688ccd9",
+      "description": "Here's the simplest way to think about OpenClaw. It's apersonal AI assistant you run on your own devices. Not a SaaS chatbot. Not a browser. A system. The ...",
+      "site_name": "Medium · Tattva Tarang"
     },
     {
-      "title": "openclaw & moltbook !! Transformer Moview Moment",
-      "link": "https://www.google.com/sorry/index?continue=https://m.youtube.com/shorts/x5DRVivls0c&q=EgRC-UKpGKyYgcwGIjDC_xNGoq8NCfWyHncZcxfHU3iaIqXfG5PUCgVLvFo1Ut1jv-T0M4vxfWGcJ-oxZfgyBz5qY25kclJaAUM",
-      "description": "8天前—d2ailabs helps you build future-ready skills with AI and apply artificial intelligence to real-world business problems.",
-      "site_name": "google.com"
+      "title": "I Ship Code I Don't Read: Lessons from the Explosive Rise ...",
+      "link": "https://medium.com/@natishalom/i-ship-code-i-dont-read-lessons-from-the-explosive-rise-of-openclaw-c7fde5fbe5cb",
+      "description": "OpenClaw isan innovative, local-first AI toolfundamentally challenging the existing business model of “wrapper companies” that merely add a markup to ...",
+      "site_name": "Medium"
     },
     {
-      "title": "Your personal AI Assistant #openclaw #moltbot ...",
-      "link": "https://www.google.com/sorry/index?continue=https://m.youtube.com/shorts/9VGkEg71gmQ&q=EgRC-UKpGMjm_csGIjDk9bSkdobi2ARoaxk4bcQCItJnK5Ekgos0LsRcpe-U99P-F_NuSwHvVE1JlZ1ApiwyBz5qY25kclJaAUM",
-      "description": "2026年1月30日—Clawdbot is nowOpenClaw.",
-      "site_name": "google.com"
+      "title": "Openclaw works, but is it worth paying for big LLM ...",
+      "link": "https://cechinel.medium.com/openclaw-works-but-is-it-worth-paying-for-big-llm-subscriptions-or-buying-expensive-hardware-only-9ec2efda5ffa",
+      "description": "Openclaw works, butis it worth paying for big LLM subscriptionsor buying expensive hardware only to get a private AI assistant?",
+      "site_name": "Medium · Jeff Cechinel"
     }
   ]
 }
