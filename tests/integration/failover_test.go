@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -12,7 +13,7 @@ import (
 
 // TestProviderFailover tests provider failover functionality
 func TestProviderFailover(t *testing.T) {
-	errorClassifier := types.NewErrorClassifier()
+	errorClassifier := types.NewSimpleErrorClassifier()
 
 	// Create mock providers that simulate failures
 	primary := &mockProvider{
@@ -25,7 +26,7 @@ func TestProviderFailover(t *testing.T) {
 	}
 
 	// Create failover provider
-	failover := provider.NewFailoverProvider(primary, fallback, errorClassifier)
+	failover := providers.NewFailoverProvider(primary, fallback, errorClassifier)
 
 	ctx := context.Background()
 	messages := []providers.Message{
@@ -45,7 +46,7 @@ func TestProviderFailover(t *testing.T) {
 	// Check circuit breaker state
 	cb := failover.GetCircuitBreaker()
 	state := cb.GetState()
-	if state != provider.CircuitStateOpen {
+	if state != providers.CircuitStateOpen {
 		t.Logf("Circuit breaker state: %v (expected Open after failures)", state)
 	}
 
@@ -54,11 +55,11 @@ func TestProviderFailover(t *testing.T) {
 
 // TestProviderRotation tests provider profile rotation
 func TestProviderRotation(t *testing.T) {
-	errorClassifier := types.NewErrorClassifier()
+	errorClassifier := types.NewSimpleErrorClassifier()
 
 	// Create rotation provider with round-robin strategy
-	rotation := provider.NewRotationProvider(
-		provider.RotationStrategyRoundRobin,
+	rotation := providers.NewRotationProvider(
+		providers.RotationStrategyRoundRobin,
 		5*time.Minute,
 		errorClassifier,
 	)
@@ -98,10 +99,10 @@ func TestProviderRotation(t *testing.T) {
 
 // TestProviderCooldown tests cooldown mechanism for failed providers
 func TestProviderCooldown(t *testing.T) {
-	errorClassifier := types.NewErrorClassifier()
+	errorClassifier := types.NewSimpleErrorClassifier()
 
-	rotation := provider.NewRotationProvider(
-		provider.RotationStrategyLeastUsed,
+	rotation := providers.NewRotationProvider(
+		providers.RotationStrategyLeastUsed,
 		1*time.Minute, // Short cooldown for testing
 		errorClassifier,
 	)
@@ -146,10 +147,10 @@ func TestProviderCooldown(t *testing.T) {
 // TestCircuitBreaker tests circuit breaker behavior
 func TestCircuitBreaker(t *testing.T) {
 	// Create circuit breaker with threshold of 3 failures
-	cb := provider.NewCircuitBreaker(3, 5*time.Second)
+	cb := providers.NewCircuitBreaker(3, 5*time.Second)
 
 	// Initially should be closed
-	if cb.GetState() != provider.CircuitStateClosed {
+	if cb.GetState() != providers.CircuitStateClosed {
 		t.Errorf("Expected initial state to be Closed, got: %v", cb.GetState())
 	}
 
@@ -159,7 +160,7 @@ func TestCircuitBreaker(t *testing.T) {
 	}
 
 	// Should now be open
-	if cb.GetState() != provider.CircuitStateOpen {
+	if cb.GetState() != providers.CircuitStateOpen {
 		t.Errorf("Expected state to be Open after threshold failures, got: %v", cb.GetState())
 	}
 
@@ -181,7 +182,7 @@ func TestCircuitBreaker(t *testing.T) {
 	cb.RecordSuccess()
 	cb.RecordSuccess()
 
-	if cb.GetState() != provider.CircuitStateClosed {
+	if cb.GetState() != providers.CircuitStateClosed {
 		t.Errorf("Expected state to be Closed after successes, got: %v", cb.GetState())
 	}
 
@@ -190,7 +191,7 @@ func TestCircuitBreaker(t *testing.T) {
 
 // TestErrorClassification tests error classification
 func TestErrorClassification(t *testing.T) {
-	classifier := types.NewErrorClassifier()
+	classifier := types.NewSimpleErrorClassifier()
 
 	tests := []struct {
 		errorString string
@@ -205,7 +206,7 @@ func TestErrorClassification(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		reason := classifier.ClassifyError(fmt.Errorf(tt.errorString))
+		reason := classifier.ClassifyError(errors.New(tt.errorString))
 		if reason != tt.expected {
 			t.Errorf("Error '%s' classified as %v, expected %v",
 				tt.errorString, reason, tt.expected)
@@ -238,7 +239,7 @@ func (m *mockProvider) Chat(ctx context.Context, messages []providers.Message, t
 		default:
 			errMsg = "unknown error"
 		}
-		return nil, fmt.Errorf(errMsg)
+		return nil, errors.New(errMsg)
 	}
 
 	if m.response == "" {

@@ -2,10 +2,7 @@ package integration
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -14,7 +11,6 @@ import (
 	"github.com/smallnest/dogclaw/goclaw/channels"
 	"github.com/smallnest/dogclaw/goclaw/config"
 	"github.com/smallnest/dogclaw/goclaw/gateway"
-	"github.com/smallnest/dogclaw/goclaw/providers"
 	"github.com/smallnest/dogclaw/goclaw/session"
 )
 
