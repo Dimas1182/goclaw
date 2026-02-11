@@ -12,6 +12,7 @@ func ReadLine(prompt string) (string, error) {
 }
 
 // ReadLineWithHistory 读取一行输入（支持历史记录）
+// 注意：每次调用创建新的 readline 实例，适用于一次性读取
 func ReadLineWithHistory(prompt string, history []string) (string, error) {
 	cfg := &readline.Config{
 		Prompt:          prompt,
@@ -47,4 +48,30 @@ func ReadLineWithHistory(prompt string, history []string) (string, error) {
 	}
 
 	return line, nil
+}
+
+// NewReadline 创建持久化的 readline 实例
+// 用于需要多次读取输入并保持历史记录的场景
+func NewReadline(prompt string) (*readline.Instance, error) {
+	cfg := &readline.Config{
+		Prompt:          prompt,
+		HistoryLimit:    1000,
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+		// 确保输入输出正确配置
+		UniqueEditLine: true,
+		// 禁用自动完成，避免干扰
+		AutoComplete: nil,
+	}
+
+	return readline.NewEx(cfg)
+}
+
+// InitReadlineHistory 初始化 readline 实例的历史记录
+func InitReadlineHistory(rl *readline.Instance, history []string) {
+	for _, h := range history {
+		if h != "" {
+			_ = rl.SaveHistory(h)
+		}
+	}
 }

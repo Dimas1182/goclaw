@@ -1,0 +1,60 @@
+{
+  "query": "北京当前天气",
+  "total_results": 10,
+  "results": [
+    {
+      "title": "搜索结果 ·中国北京市",
+      "link": "#"
+    },
+    {
+      "title": "10日（今天）",
+      "link": "https://www.weather.com.cn/weather/101010100.shtml",
+      "description": "今天降温主要区域将转移至江南中东部、华南等地，中东部其余大部地区气温将开启回升。今天雨雪范围明显缩小，明天起大部地区将迎来降水间歇期。",
+      "site_name": "天气网"
+    },
+    {
+      "title": "北京旅游必去的20大景点，中国人都想去，首都旅行最全攻略",
+      "link": "https://www.visitbeijing.com.cn/article/47QqC4Np2ua",
+      "site_name": "北京旅游网"
+    },
+    {
+      "title": "北京的天气如何？ - 中央文化和旅游管理干部学院",
+      "link": "https://cacta.cn/detail_question.aspx?isfaq=1&questionid=1",
+      "site_name": "中央文化和旅游管理干部学院"
+    },
+    {
+      "title": "首都气候– 北京 - 中国天气网",
+      "link": "https://bj.weather.com.cn/sdqh/index.shtml",
+      "site_name": "北京 - 中国天气网"
+    },
+    {
+      "title": "北京供暖最新消息！11月7日多区供暖点火试运行！",
+      "link": "https://www.beijing.gov.cn/fuwu/bmfw/bmzt/2023gn/zx/202511/t20251104_4254118.html",
+      "site_name": "北京市人民政府"
+    },
+    {
+      "title": "北京-天气预报",
+      "link": "https://www.nmc.cn/publish/forecast/ABJ/beijing.html",
+      "description": "11:00 · 2.2℃. 2.3m/s. 西风. 1025.7hPa ; 14:00 · 3.2℃. 3.3m/s. 西南风. 1023.6hPa ; 17:00 · 4.3℃. 2.7m/s. 西南风. 1023.9hPa.",
+      "site_name": "中央气象台"
+    },
+    {
+      "title": "Beijing, Beijing, China Weather Forecast",
+      "link": "https://www.accuweather.com/en/cn/beijing/101924/weather-forecast/101924",
+      "description": "Current Weather. 2:30 AM. 23°F. Clear. RealFeel® 27°. Beijing Weather Radar. Beijing Weather Radar. Static Radar Temporarily Unavailable. Thank you for your ...",
+      "site_name": "AccuWeather"
+    },
+    {
+      "title": "【北京天气】北京40天天气预报,北京更长预报 ...",
+      "link": "https://www.weather.com.cn/weather40d/101010100.shtml",
+      "description": "今起三天，寒潮将给中东部带来明显降温，东北地区东部、江南东部降温可超12℃。降温的同时，今明天中东部还会迎来大范围雨雪天气。 2月4日 ...",
+      "site_name": "天气网"
+    },
+    {
+      "title": "Beijing, People's Republic Of China Weather Conditions",
+      "link": "https://www.wunderground.com/weather/cn/beijing",
+      "description": "Beijing, People's Republic of China Weather Conditionsstar_ratehome. icon18 °FBeijing Capital Intl Airport Station|Report.",
+      "site_name": "Weather Underground"
+    }
+  ]
+}

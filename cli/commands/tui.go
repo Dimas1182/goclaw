@@ -7,9 +7,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/chzyer/readline"
 	"github.com/smallnest/dogclaw/goclaw/agent"
 	"github.com/smallnest/dogclaw/goclaw/agent/tools"
 	"github.com/smallnest/dogclaw/goclaw/bus"
+	"github.com/smallnest/dogclaw/goclaw/cli/input"
 	"github.com/smallnest/dogclaw/goclaw/config"
 	"github.com/smallnest/dogclaw/goclaw/internal/logger"
 	"github.com/smallnest/dogclaw/goclaw/providers"
@@ -219,25 +221,51 @@ func runTUI(cmd *cobra.Command, args []string) {
 	fmt.Println("Starting interactive TUI mode...")
 	fmt.Println("Press Ctrl+C to exit")
 	fmt.Println()
+	fmt.Println("Arrow keys: ↑/↓ for history, ←/→ for edit")
+	fmt.Println()
 
 	// Import the chat command registry for slash commands
 	// nolint:typecheck
 	cmdRegistry := NewCommandRegistry()
 
-	// Simple input loop
+	// Create persistent readline instance for history navigation
+	rl, err := input.NewReadline("➤ ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to create readline: %v\n", err)
+		os.Exit(1)
+	}
+	defer rl.Close()
+
+	// Initialize history from session
+	input.InitReadlineHistory(rl, getUserInputHistory(sess))
+
+	// Input loop with persistent readline
 	fmt.Println("Enter your message (or /help for commands):")
 	for {
-		fmt.Print("➤ ")
-
-		var input string
-		fmt.Scanln(&input) // nolint:errcheck
-
-		if input == "" {
+		line, err := rl.Readline()
+		if err != nil {
+			if err == readline.ErrInterrupt {
+				fmt.Println("\nGoodbye!")
+				break
+			}
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			continue
 		}
 
+		// Save non-empty input to history
+		if line != "" {
+			_ = rl.SaveHistory(line)
+		}
+
+		if line == "" {
+			continue
+		}
+
+		// Echo the input with prompt (readline doesn't automatically print after Enter)
+		fmt.Printf("%s%s\n", "➤ ", line)
+
 		// Check for commands
-		result, isCommand, shouldExit := cmdRegistry.Execute(input)
+		result, isCommand, shouldExit := cmdRegistry.Execute(line)
 		if isCommand {
 			if shouldExit {
 				fmt.Println("Goodbye!")
@@ -252,7 +280,7 @@ func runTUI(cmd *cobra.Command, args []string) {
 		// Add user message
 		sess.AddMessage(session.Message{
 			Role:    "user",
-			Content: input,
+			Content: line,
 		})
 
 		// Run agent
@@ -272,6 +300,9 @@ func runTUI(cmd *cobra.Command, args []string) {
 			})
 			_ = sessionMgr.Save(sess)
 		}
+
+		// Force readline to refresh terminal state
+		rl.Refresh()
 	}
 }
 
@@ -436,4 +467,19 @@ func setLoadedSkills(sess *session.Session, skills []string) {
 		sess.Metadata = make(map[string]interface{})
 	}
 	sess.Metadata["loaded_skills"] = skills
+}
+
+// getUserInputHistory extracts user message history for readline
+func getUserInputHistory(sess *session.Session) []string {
+	history := sess.GetHistory(100)
+	userInputs := make([]string, 0, len(history))
+
+	// Extract only user messages (in reverse order - most recent first)
+	for i := len(history) - 1; i >= 0; i-- {
+		if history[i].Role == "user" {
+			userInputs = append(userInputs, history[i].Content)
+		}
+	}
+
+	return userInputs
 }
