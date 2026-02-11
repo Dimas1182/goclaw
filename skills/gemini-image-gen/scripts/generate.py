@@ -10,8 +10,8 @@ Usage:
 
 Examples:
     python generate.py "A serene mountain landscape"
-    python generate.py "Futuristic city" --aspect-ratio 16:9 --output city.png
-    python generate.py "Modern design" --response-modalities image text
+    python generate.py "Futuristic city" --output city.png
+    python generate.py "Modern design" --include-text
 """
 
 import os
@@ -23,7 +23,7 @@ from typing import Optional, List
 
 try:
     from google import genai
-    from google.genai import types
+    from google.genai.types import GenerateContentConfig, Modality
 except ImportError:
     print("Error: google-genai package not installed")
     print("Install with: pip install google-genai")
@@ -32,21 +32,28 @@ except ImportError:
 
 def find_api_key() -> Optional[str]:
     """
-    Find GEMINI_API_KEY in this order:
-    1. Process environment
-    2. Skill directory .env file
-    3. Project directory .env file
+    Find API key in this order:
+    1. GOOGLE_API_KEY (process environment)
+    2. GEMINI_API_KEY (process environment)
+    3. Skill directory .env file
+    4. Project directory .env file
 
     Returns:
         API key string or None if not found
     """
-    # 1. Check process environment
-    api_key = os.getenv('GEMINI_API_KEY')
+    # 1. Check GOOGLE_API_KEY first (preferred by google-genai)
+    api_key = os.getenv('GOOGLE_API_KEY')
     if api_key:
-        print("✓ API key found in process environment")
+        print("✓ API key found in GOOGLE_API_KEY environment")
         return api_key
 
-    # 2. Check skill directory .env
+    # 2. Check GEMINI_API_KEY
+    api_key = os.getenv('GEMINI_API_KEY')
+    if api_key:
+        print("✓ API key found in GEMINI_API_KEY environment")
+        return api_key
+
+    # 3. Check skill directory .env
     skill_dir = Path(__file__).parent.parent
     skill_env = skill_dir / '.env'
     if skill_env.exists():
@@ -55,7 +62,7 @@ def find_api_key() -> Optional[str]:
             print(f"✓ API key found in skill directory: {skill_env}")
             return api_key
 
-    # 3. Check project directory .env
+    # 4. Check project directory .env
     project_dir = skill_dir.parent.parent.parent  # Go up to project root
     project_env = project_dir / '.env'
     if project_env.exists():
@@ -69,7 +76,7 @@ def find_api_key() -> Optional[str]:
 
 def load_env_file(env_path: Path) -> Optional[str]:
     """
-    Load GEMINI_API_KEY from .env file
+    Load API key from .env file (GOOGLE_API_KEY or GEMINI_API_KEY)
 
     Args:
         env_path: Path to .env file
@@ -81,7 +88,7 @@ def load_env_file(env_path: Path) -> Optional[str]:
         with open(env_path, 'r') as f:
             for line in f:
                 line = line.strip()
-                if line.startswith('GEMINI_API_KEY='):
+                if line.startswith(('GOOGLE_API_KEY=', 'GEMINI_API_KEY=')):
                     # Remove quotes if present
                     key = line.split('=', 1)[1].strip()
                     key = key.strip('"').strip("'")
@@ -95,10 +102,9 @@ def load_env_file(env_path: Path) -> Optional[str]:
 def generate_image(
     prompt: str,
     api_key: str,
-    aspect_ratio: str = '1:1',
-    response_modalities: List[str] = None,
+    include_text: bool = False,
     output_path: Optional[str] = None,
-    model: str = 'gemini-3.0-preview-image'
+    model: str = 'gemini-3-pro-image-preview'
 ) -> bool:
     """
     Generate image using Gemini API
@@ -106,31 +112,30 @@ def generate_image(
     Args:
         prompt: Text description of image to generate
         api_key: Gemini API key
-        aspect_ratio: Image aspect ratio (1:1, 16:9, 9:16, 4:3, 3:4)
-        response_modalities: List of modalities (image, text)
+        include_text: Whether to include text in response
         output_path: Optional custom output path
         model: Model name to use
 
     Returns:
         True if successful, False otherwise
     """
-    if response_modalities is None:
-        response_modalities = ['image']
+    # Build response modalities using Modality enum
+    modalities = [Modality.IMAGE]
+    if include_text:
+        modalities.append(Modality.TEXT)
 
     print(f"\n🎨 Generating image with Gemini...")
     print(f"   Model: {model}")
     print(f"   Prompt: {prompt}")
-    print(f"   Aspect ratio: {aspect_ratio}")
-    print(f"   Response modalities: {', '.join(response_modalities)}")
+    print(f"   Modalities: {', '.join([m.value for m in modalities])}")
 
     try:
         # Initialize client
         client = genai.Client(api_key=api_key)
 
-        # Generate content
-        config = types.GenerateContentConfig(
-            response_modalities=response_modalities,
-            aspect_ratio=aspect_ratio
+        # Generate content with proper enum usage
+        config = GenerateContentConfig(
+            response_modalities=modalities
         )
 
         response = client.models.generate_content(
@@ -170,8 +175,8 @@ def generate_image(
                 print(f"✓ Image saved: {save_path}")
 
         # Print text if included
-        if 'text' in response_modalities:
-            text_parts = [p.text for p in candidate.content.parts if hasattr(p, 'text')]
+        if include_text:
+            text_parts = [p.text for p in candidate.content.parts if hasattr(p, 'text') and p.text]
             if text_parts:
                 print(f"\n📝 Generated text:")
                 for text in text_parts:
@@ -196,9 +201,9 @@ def main():
         epilog="""
 Examples:
   %(prog)s "A serene mountain landscape"
-  %(prog)s "Futuristic city" --aspect-ratio 16:9
-  %(prog)s "Modern design" --response-modalities image text
-  %(prog)s "Robot" --output ./my-robot.png
+  %(prog)s "Futuristic city" --output city.png
+  %(prog)s "Modern design" --include-text
+  %(prog)s "Robot" --model gemini-3-pro-image-preview --output ./my-robot.png
         """
     )
 
@@ -208,18 +213,9 @@ Examples:
     )
 
     parser.add_argument(
-        '--aspect-ratio',
-        default='1:1',
-        choices=['1:1', '16:9', '9:16', '4:3', '3:4'],
-        help='Image aspect ratio (default: 1:1)'
-    )
-
-    parser.add_argument(
-        '--response-modalities',
-        nargs='+',
-        default=['image'],
-        choices=['image', 'text'],
-        help='Response modalities (default: image)'
+        '--include-text',
+        action='store_true',
+        help='Include text description in response'
     )
 
     parser.add_argument(
@@ -229,22 +225,23 @@ Examples:
 
     parser.add_argument(
         '--model',
-        default='gemini-3.0-preview-image',
-        help='Model to use (default: gemini-3.0-preview-image)'
+        default='gemini-3-pro-image-preview',
+        help='Model to use (default: gemini-3-pro-image-preview)'
     )
 
     args = parser.parse_args()
 
     # Find API key
-    print("🔍 Searching for GEMINI_API_KEY...")
+    print("🔍 Searching for API key...")
     api_key = find_api_key()
 
     if not api_key:
-        print("\n✗ GEMINI_API_KEY not found!")
+        print("\n✗ API key not found!")
         print("\nPlease set your API key in one of these locations:")
-        print("  1. Environment variable: export GEMINI_API_KEY='your-key'")
-        print("  2. Skill directory: .claude/skills/gemini-image-gen/.env")
-        print("  3. Project root: ./.env")
+        print("  1. Environment variable: export GOOGLE_API_KEY='your-key'")
+        print("  2. Environment variable: export GEMINI_API_KEY='your-key'")
+        print("  3. Skill directory: .claude/skills/gemini-image-gen/.env")
+        print("  4. Project root: ./.env")
         print("\nGet your API key at: https://aistudio.google.com/apikey")
         sys.exit(1)
 
@@ -252,8 +249,7 @@ Examples:
     success = generate_image(
         prompt=args.prompt,
         api_key=api_key,
-        aspect_ratio=args.aspect_ratio,
-        response_modalities=args.response_modalities,
+        include_text=args.include_text,
         output_path=args.output,
         model=args.model
     )

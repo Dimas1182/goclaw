@@ -1,6 +1,6 @@
 # Gemini Image Generation Skill
 
-Agent skill for generating high-quality images using Google's Gemini 2.5 Flash Image model.
+Generate images from text prompts using Google's Gemini 3 Pro Image model.
 
 ## Overview
 
@@ -12,7 +12,6 @@ This skill enables Claude Code agents to generate images from text prompts, edit
 - **Image Editing**: Modify existing images by adding/removing elements or changing styles
 - **Multi-Image Composition**: Combine up to 3 source images into new compositions
 - **Iterative Refinement**: Progressively improve images through multi-turn conversations
-- **Flexible Aspect Ratios**: Support for 1:1, 16:9, 9:16, 4:3, 3:4
 - **Safety Controls**: Configurable content filtering
 - **SynthID Watermarking**: Automatic invisible watermarking on all outputs
 
@@ -26,7 +25,7 @@ pip install google-genai
 
 ### 2. Get API Key
 
-Visit [Google AI Studio](https://aistudio.google.com/apikey) to obtain your `GEMINI_API_KEY`.
+Visit [Google AI Studio](https://aistudio.google.com/apikey) to obtain your `GOOGLE_API_KEY`.
 
 ### 3. Configure API Key
 
@@ -34,19 +33,19 @@ The skill checks for the API key in this order:
 
 1. **Process environment variable**:
    ```bash
-   export GEMINI_API_KEY="your-key-here"
+   export GOOGLE_API_KEY="your-key-here"
    ```
 
 2. **Skill directory** `.env` file:
    ```bash
-   # Create .claude/skills/gemini-image-gen/.env
-   GEMINI_API_KEY=your-key-here
+   # Create skills/gemini-image-gen/.env
+   GOOGLE_API_KEY=your-key-here
    ```
 
 3. **Project root** `.env` file:
    ```bash
    # Create ./.env in project root
-   GEMINI_API_KEY=your-key-here
+   GOOGLE_API_KEY=your-key-here
    ```
 
 ## Quick Start
@@ -55,21 +54,16 @@ The skill checks for the API key in this order:
 
 ```bash
 # Generate a simple image
-python .claude/skills/gemini-image-gen/scripts/generate.py \
+python skills/gemini-image-gen/scripts/generate.py \
   "A serene mountain landscape at sunset"
 
-# Specify aspect ratio
-python .claude/skills/gemini-image-gen/scripts/generate.py \
-  "Modern architecture design" \
-  --aspect-ratio 16:9
-
-# Generate both image and text
-python .claude/skills/gemini-image-gen/scripts/generate.py \
+# Generate with both image and text description
+python skills/gemini-image-gen/scripts/generate.py \
   "Futuristic city with flying cars" \
-  --response-modalities image text
+  --include-text
 
 # Custom output path
-python .claude/skills/gemini-image-gen/scripts/generate.py \
+python skills/gemini-image-gen/scripts/generate.py \
   "Vintage robot illustration" \
   --output ./my-images/robot.png
 ```
@@ -78,17 +72,16 @@ python .claude/skills/gemini-image-gen/scripts/generate.py \
 
 ```python
 from google import genai
-from google.genai import types
+from google.genai.types import GenerateContentConfig, Modality
 import os
 
-client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+client = genai.Client(api_key=os.getenv('GOOGLE_API_KEY'))
 
 response = client.models.generate_content(
-    model='gemini-2.5-flash-image',
+    model='gemini-3-pro-image-preview',
     contents='A peaceful zen garden with raked sand and stones',
-    config=types.GenerateContentConfig(
-        response_modalities=['image'],
-        aspect_ratio='16:9'
+    config=GenerateContentConfig(
+        response_modalities=[Modality.IMAGE]
     )
 )
 
@@ -130,9 +123,9 @@ gemini-image-gen/
 
 ## Model Information
 
-**Model**: `gemini-2.5-flash-image`
+**Model**: `gemini-3-pro-image-preview`
 
-- **Latest Update**: October 2025
+- **Latest Update**: 2026
 - **Knowledge Cutoff**: June 2025
 - **Input Tokens**: 65,536
 - **Output Tokens**: 32,768
@@ -165,28 +158,35 @@ The directory is created automatically if it doesn't exist. Images are saved wit
 
 ### Product Photography
 
-```python
-generate("Commercial product photo of wireless headphones, studio lighting, white background, professional photography")
+```bash
+python skills/gemini-image-gen/scripts/generate.py \
+  "Commercial product photo of wireless headphones, studio lighting, white background, professional photography"
 ```
 
 ### Social Media Assets
 
-```python
-# Square for Instagram
-generate("Modern minimalist quote design", aspect_ratio='1:1')
+```bash
+# Social media post
+python skills/gemini-image-gen/scripts/generate.py \
+  "Modern minimalist quote design for Instagram"
 
 # Story format
-generate("Behind-the-scenes photo", aspect_ratio='9:16')
+python skills/gemini-image-gen/scripts/generate.py \
+  "Behind-the-scenes photo for social media story"
 ```
 
 ### Marketing Materials
 
-```python
-# Banner
-generate("Website hero banner for tech startup", aspect_ratio='16:9')
+```bash
+# Website banner
+python skills/gemini-image-gen/scripts/generate.py \
+  "Website hero banner for tech startup" \
+  --output ./banner.png
 
-# Poster
-generate("Event poster design", aspect_ratio='3:4')
+# Event poster
+python skills/gemini-image-gen/scripts/generate.py \
+  "Event poster design" \
+  --output ./poster.png
 ```
 
 ### Image Editing
@@ -195,7 +195,13 @@ generate("Event poster design", aspect_ratio='3:4')
 import PIL.Image
 
 original = PIL.Image.open('photo.jpg')
-edit_image("Add golden hour lighting effect", original)
+response = client.models.generate_content(
+    model='gemini-3-pro-image-preview',
+    contents=[
+        'Add golden hour lighting effect',
+        original
+    ]
+)
 ```
 
 ## Troubleshooting
@@ -204,10 +210,11 @@ edit_image("Add golden hour lighting effect", original)
 
 ```bash
 # Verify environment variable
+echo $GOOGLE_API_KEY
 echo $GEMINI_API_KEY
 
 # Check .env files
-cat .claude/skills/gemini-image-gen/.env
+cat skills/gemini-image-gen/.env
 cat .env
 ```
 
@@ -257,4 +264,4 @@ For issues or questions:
 
 ## Version
 
-**1.0.0** - Initial release with Gemini 2.5 Flash Image support
+**1.0.0** - Initial release with Gemini 3 Pro Image support

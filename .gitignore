@@ -35,5 +35,6 @@ goclaw
 !goclaw/
 
 config.json
+google_search_results.json
 
 .history
