@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//types"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/types"
 )
 
 // ProviderType 提供商类型

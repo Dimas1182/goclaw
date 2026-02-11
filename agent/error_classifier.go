@@ -3,7 +3,7 @@ package agent
 import (
 	"strings"
 
-	"github.com/smallnest/goclaw//types"
+	"github.com/smallnest/goclaw/types"
 )
 
 // For backwards compatibility, re-export the types

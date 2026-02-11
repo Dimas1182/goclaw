@@ -279,14 +279,15 @@ func applyColor(colorCode, text string) string {
 	return colorCode + text + ansiReset
 }
 
-func colorGray(s string) string    { return applyColor(ansiGray, s) }
-func colorRed(s string) string     { return applyColor(ansiRed, s) }
-func colorGreen(s string) string   { return applyColor(ansiGreen, s) }
-func colorYellow(s string) string  { return applyColor(ansiYellow, s) }
-func colorBlue(s string) string    { return applyColor(ansiBlue, s) }
-func colorCyan(s string) string    { return applyColor(ansiCyan, s) }
-func colorWhite(s string) string   { return applyColor(ansiWhite, s) }
-func colorHiRed(s string) string   { return applyColor(ansiHighRed, s) }
+func colorGray(s string) string   { return applyColor(ansiGray, s) }
+func colorRed(s string) string    { return applyColor(ansiRed, s) }
+func colorGreen(s string) string  { return applyColor(ansiGreen, s) }
+func colorYellow(s string) string { return applyColor(ansiYellow, s) }
+func colorBlue(s string) string   { return applyColor(ansiBlue, s) }
+func colorCyan(s string) string   { return applyColor(ansiCyan, s) }
+func colorWhite(s string) string  { return applyColor(ansiWhite, s) }
+func colorHiRed(s string) string  { return applyColor(ansiHighRed, s) }
+
 // nolint:unused
 func _colorHiGreen(s string) string { return applyColor(ansiHighGreen, s) }
 

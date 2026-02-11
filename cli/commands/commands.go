@@ -13,7 +13,7 @@ import (
 
 	"github.com/chzyer/readline"
 	"github.com/manifoldco/promptui"
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/session"
 )
 
 // SpecialMarker 是用于触发菜单选择的特殊标记
@@ -38,11 +38,11 @@ type ArgSpec struct {
 
 // CommandRegistry 命令注册表
 type CommandRegistry struct {
-	commands    map[string]*Command
-	homeDir     string
-	menuMode    bool // 是否在菜单选择模式
-	sessionMgr  *session.Manager
-	stopped     bool // 停止标志，用于中止正在运行的 agent
+	commands   map[string]*Command
+	homeDir    string
+	menuMode   bool // 是否在菜单选择模式
+	sessionMgr *session.Manager
+	stopped    bool // 停止标志，用于中止正在运行的 agent
 }
 
 // NewCommandRegistry 创建命令注册表
@@ -399,7 +399,7 @@ func (r *CommandRegistry) handleStatus(args []string) string {
 					sb.WriteString(fmt.Sprintf("      Created:  %s\n", sess.CreatedAt.Format("2006-01-02 15:04")))
 					updatedAt := time.Since(sess.UpdatedAt)
 					if updatedAt < time.Minute {
-						sb.WriteString(fmt.Sprintf("      Updated:  just now\n"))
+						sb.WriteString("      Updated:  just now\n")
 					} else if updatedAt < time.Hour {
 						sb.WriteString(fmt.Sprintf("      Updated:  %d min ago\n", int(updatedAt.Minutes())))
 					} else if updatedAt < 24*time.Hour {

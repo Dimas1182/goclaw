@@ -38,12 +38,12 @@
 
 1. **Import Cycle Error**:
 ```
-imports github.com/smallnest/goclaw//providers from factory.go
-imports github.com/smallnest/goclaw//provider from factory.go
-imports github.com/smallnest/goclaw//providers from failover.go: import cycle not allowed
+imports github.com/smallnest/goclaw/providers from factory.go
+imports github.com/smallnest/goclaw/provider from factory.go
+imports github.com/smallnest/goclaw/providers from failover.go: import cycle not allowed
 ```
 
-2. **Missing Package**: The code references `github.com/smallnest/goclaw//provider` (singular) but the actual package is `providers` (plural)
+2. **Missing Package**: The code references `github.com/smallnest/goclaw/provider` (singular) but the actual package is `providers` (plural)
 
 3. **Agent Import Cycle**: `providers/factory.go` imports `agent` which imports `providers`
 
@@ -138,7 +138,7 @@ func (e *ErrorClassifier) Classify(errText string) FailoverReason {
 **Then update `providers/factory.go`**:
 ```go
 // Remove this import:
-// "github.com/smallnest/goclaw//agent"
+// "github.com/smallnest/goclaw/agent"
 
 // Change this:
 errorClassifier := agent.NewErrorClassifier()
@@ -156,7 +156,7 @@ errorClassifier := NewErrorClassifier()
 **In `providers/factory.go`**:
 ```go
 // Remove:
-import "github.com/smallnest/goclaw//provider"
+import "github.com/smallnest/goclaw/provider"
 
 // Change:
 strategy := provider.RotationStrategy(cfg.Providers.Failover.Strategy)

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/slack-go/slack"
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/internal/logger"
 	"go.uber.org/zap"
 )
 

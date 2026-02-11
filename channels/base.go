@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/smallnest/goclaw//bus"
+	"github.com/smallnest/goclaw/bus"
 )
 
 // BaseChannel 通道基础接口

@@ -17,7 +17,7 @@ import (
 	"github.com/mafredri/cdp/protocol/page"
 	"github.com/mafredri/cdp/protocol/runtime"
 	"github.com/mafredri/cdp/protocol/target"
-	"github.com/smallnest/goclaw//agent/tools"
+	"github.com/smallnest/goclaw/agent/tools"
 	"github.com/spf13/cobra"
 )
 

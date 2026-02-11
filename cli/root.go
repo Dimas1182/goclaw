@@ -7,18 +7,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/smallnest/goclaw//agent"
-	"github.com/smallnest/goclaw//agent/tools"
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//channels"
-	"github.com/smallnest/goclaw//cli/commands"
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//cron"
-	"github.com/smallnest/goclaw//gateway"
-	"github.com/smallnest/goclaw//internal/logger"
-	"github.com/smallnest/goclaw//internal/workspace"
-	"github.com/smallnest/goclaw//providers"
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/agent"
+	"github.com/smallnest/goclaw/agent/tools"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/channels"
+	"github.com/smallnest/goclaw/cli/commands"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/cron"
+	"github.com/smallnest/goclaw/gateway"
+	"github.com/smallnest/goclaw/internal/logger"
+	"github.com/smallnest/goclaw/internal/workspace"
+	"github.com/smallnest/goclaw/providers"
+	"github.com/smallnest/goclaw/session"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -53,8 +53,10 @@ var installCmd = &cobra.Command{
 }
 
 // Flags for install command
-var installConfigPath string
-var installWorkspacePath string
+var (
+	installConfigPath    string
+	installWorkspacePath string
+)
 
 func init() {
 	// Add install command flags

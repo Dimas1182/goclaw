@@ -10,14 +10,14 @@ import (
 	"time"
 
 	"github.com/chzyer/readline"
-	"github.com/smallnest/goclaw//agent"
-	"github.com/smallnest/goclaw//agent/tools"
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//cli/input"
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//internal/logger"
-	"github.com/smallnest/goclaw//providers"
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/agent"
+	"github.com/smallnest/goclaw/agent/tools"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/cli/input"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/internal/logger"
+	"github.com/smallnest/goclaw/providers"
+	"github.com/smallnest/goclaw/session"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -576,7 +576,7 @@ func findMostRecentTUISession(mgr *session.Manager) string {
 
 // FailureTracker 追踪工具调用失败
 type FailureTracker struct {
-	toolFailures map[string]int  // tool_name -> failure count
+	toolFailures map[string]int // tool_name -> failure count
 	totalCount   int
 }
 

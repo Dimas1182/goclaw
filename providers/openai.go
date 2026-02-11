@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/internal/logger"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"go.uber.org/zap"

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/smallnest/goclaw//providers"
-	"github.com/smallnest/goclaw//types"
+	"github.com/smallnest/goclaw/providers"
+	"github.com/smallnest/goclaw/types"
 )
 
 // TestProviderFailover tests provider failover functionality

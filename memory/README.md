@@ -27,7 +27,7 @@ This package implements a vector-based memory system for goclaw with semantic se
 
 ```go
 import (
-    "github.com/smallnest/goclaw//memory"
+    "github.com/smallnest/goclaw/memory"
 )
 
 // Create embedding provider
@@ -156,7 +156,7 @@ opts := memory.SearchOptions{
 To integrate with the agent context builder:
 
 ```go
-import "github.com/smallnest/goclaw//memory"
+import "github.com/smallnest/goclaw/memory"
 
 // In agent/context.go
 type ContextBuilder struct {

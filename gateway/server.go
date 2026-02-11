@@ -12,11 +12,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//channels"
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//internal/logger"
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/channels"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/internal/logger"
+	"github.com/smallnest/goclaw/session"
 	"go.uber.org/zap"
 )
 
@@ -554,7 +554,7 @@ func (s *Server) broadcastOutbound(ctx context.Context) {
 // Connection WebSocket 连接
 type Connection struct {
 	*websocket.Conn
-	ID           string
+	ID string
 	// nolint:unused
 	_sessionID   string // 保留供将来使用
 	pingInterval time.Duration

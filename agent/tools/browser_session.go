@@ -13,7 +13,7 @@ import (
 	"github.com/mafredri/cdp/protocol/emulation"
 	"github.com/mafredri/cdp/protocol/network"
 	"github.com/mafredri/cdp/rpcc"
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/internal/logger"
 	"go.uber.org/zap"
 )
 

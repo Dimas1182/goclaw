@@ -10,7 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/session"
 	"github.com/spf13/cobra"
 )
 
@@ -27,10 +27,12 @@ var sessionsListCmd = &cobra.Command{
 }
 
 // Flags for sessions list
-var sessionsListJSON bool
-var sessionsListVerbose bool
-var sessionsListStore string
-var sessionsListActive bool
+var (
+	sessionsListJSON    bool
+	sessionsListVerbose bool
+	sessionsListStore   string
+	sessionsListActive  bool
+)
 
 func init() {
 	sessionsListCmd.Flags().BoolVar(&sessionsListJSON, "json", false, "Output in JSON format")

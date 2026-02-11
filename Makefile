@@ -152,7 +152,7 @@ install:
 ## docs: Generate documentation
 docs:
 	@echo "$(COLOR_BLUE)Generating documentation...$(COLOR_RESET)"
-	@echo "Open http://localhost:6060/pkg/github.com/smallnest/goclaw// in your browser"
+	@echo "Open http://localhost:6060/pkg/github.com/smallnest/goclaw/ in your browser"
 	godoc -http=:6060
 
 ## ci: Run continuous integration checks

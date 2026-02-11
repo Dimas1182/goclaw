@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//channels"
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//gateway"
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/channels"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/gateway"
+	"github.com/smallnest/goclaw/session"
 )
 
 // TestGatewayWebSocketConnection tests WebSocket connection establishment

@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/internal/logger"
 	"go.uber.org/zap"
 	"google.golang.org/api/chat/v1"
 	"google.golang.org/api/option"

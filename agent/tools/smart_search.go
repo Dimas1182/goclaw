@@ -11,7 +11,7 @@ import (
 
 	"github.com/mafredri/cdp/protocol/dom"
 	"github.com/mafredri/cdp/protocol/page"
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/internal/logger"
 	"go.uber.org/zap"
 )
 

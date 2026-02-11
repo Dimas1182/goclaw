@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/smallnest/goclaw//agent"
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//internal/logger"
-	"github.com/smallnest/goclaw//providers"
+	"github.com/smallnest/goclaw/agent"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/internal/logger"
+	"github.com/smallnest/goclaw/providers"
 	"github.com/spf13/cobra"
 )
 
@@ -26,9 +26,7 @@ var skillsListCmd = &cobra.Command{
 	Run:   runSkillsList,
 }
 
-var (
-	skillsListVerbose bool
-)
+var skillsListVerbose bool
 
 var skillsValidateCmd = &cobra.Command{
 	Use:   "validate [skill-name]",
@@ -44,9 +42,7 @@ var skillsTestCmd = &cobra.Command{
 	Run:   runSkillsTest,
 }
 
-var (
-	skillsTestPrompt string
-)
+var skillsTestPrompt string
 
 var skillsInstallCmd = &cobra.Command{
 	Use:   "install [url|path]",

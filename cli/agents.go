@@ -8,7 +8,7 @@ import (
 	"sort"
 	"text/tabwriter"
 
-	"github.com/smallnest/goclaw//config"
+	"github.com/smallnest/goclaw/config"
 	"github.com/spf13/cobra"
 )
 
@@ -39,20 +39,26 @@ var agentsDeleteCmd = &cobra.Command{
 }
 
 // Flags for agents list
-var agentsListJSON bool
-var agentsListBindings bool
+var (
+	agentsListJSON     bool
+	agentsListBindings bool
+)
 
 // Flags for agents add
-var agentsAddWorkspace string
-var agentsAddModel string
-var agentsAddAgentDir string
-var agentsAddBind []string
-var agentsAddNonInteractive bool
-var agentsAddJSON bool
+var (
+	agentsAddWorkspace      string
+	agentsAddModel          string
+	agentsAddAgentDir       string
+	agentsAddBind           []string
+	agentsAddNonInteractive bool
+	agentsAddJSON           bool
+)
 
 // Flags for agents delete
-var agentsDeleteForce bool
-var agentsDeleteJSON bool
+var (
+	agentsDeleteForce bool
+	agentsDeleteJSON  bool
+)
 
 func init() {
 	// List flags

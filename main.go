@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/smallnest/goclaw//cli"
+	"github.com/smallnest/goclaw/cli"
 )
 
 func main() {

@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/internal/logger"
 	"go.uber.org/zap"
 )
 

@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/smallnest/dogclaw/goclaw/agent"
-	"github.com/smallnest/dogclaw/goclaw/agent/tools"
-	"github.com/smallnest/dogclaw/goclaw/bus"
-	"github.com/smallnest/dogclaw/goclaw/providers"
-	"github.com/smallnest/dogclaw/goclaw/session"
+	"github.com/smallnest/goclaw/agent"
+	"github.com/smallnest/goclaw/agent/tools"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/providers"
+	"github.com/smallnest/goclaw/session"
 )
 
 // TestE2EConversationFlow tests a complete conversation flow

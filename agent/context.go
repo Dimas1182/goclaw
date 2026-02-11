@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/smallnest/goclaw//internal/logger"
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/internal/logger"
+	"github.com/smallnest/goclaw/session"
 	"go.uber.org/zap"
 )
 
@@ -329,7 +329,7 @@ Treat this directory as the single global workspace for file operations unless e
 
 // buildRuntime 构建运行时信息
 func (b *ContextBuilder) buildRuntime() string {
-	var host, _ = os.Hostname()
+	host, _ := os.Hostname()
 	return fmt.Sprintf(`## Runtime
 
 Runtime: host=%s os=%s (%s) arch=%s`, host, runtime.GOOS, runtime.GOARCH, runtime.GOARCH)

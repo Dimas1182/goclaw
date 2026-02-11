@@ -9,7 +9,7 @@ import (
 	"github.com/mafredri/cdp/protocol/emulation"
 	"github.com/mafredri/cdp/protocol/page"
 	"github.com/mafredri/cdp/protocol/runtime"
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/internal/logger"
 	"go.uber.org/zap"
 )
 

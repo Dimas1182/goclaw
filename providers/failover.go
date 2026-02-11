@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/smallnest/goclaw//types"
+	"github.com/smallnest/goclaw/types"
 )
 
 // FailoverProvider 支持故障转移的提供商

@@ -7,13 +7,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/smallnest/goclaw//agent"
-	"github.com/smallnest/goclaw//agent/tools"
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//config"
-	"github.com/smallnest/goclaw//internal/logger"
-	"github.com/smallnest/goclaw//providers"
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/agent"
+	"github.com/smallnest/goclaw/agent/tools"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/internal/logger"
+	"github.com/smallnest/goclaw/providers"
+	"github.com/smallnest/goclaw/session"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -26,16 +26,18 @@ var agentCmd = &cobra.Command{
 }
 
 // Flags for agent command
-var agentMessage string
-var agentTo string
-var agentSessionID string
-var agentThinking bool
-var agentVerbose bool
-var agentChannel string
-var agentLocal bool
-var agentDeliver bool
-var agentJSON bool
-var agentTimeout int
+var (
+	agentMessage   string
+	agentTo        string
+	agentSessionID string
+	agentThinking  bool
+	agentVerbose   bool
+	agentChannel   string
+	agentLocal     bool
+	agentDeliver   bool
+	agentJSON      bool
+	agentTimeout   int
+)
 
 func init() {
 	agentCmd.Flags().StringVar(&agentMessage, "message", "", "Message to send to the agent (required)")

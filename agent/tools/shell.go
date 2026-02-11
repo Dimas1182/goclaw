@@ -10,7 +10,7 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"github.com/smallnest/goclaw//config"
+	"github.com/smallnest/goclaw/config"
 	"go.uber.org/zap"
 )
 

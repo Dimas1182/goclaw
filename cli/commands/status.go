@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/smallnest/goclaw//session"
+	"github.com/smallnest/goclaw/session"
 	"github.com/spf13/cobra"
 )
 

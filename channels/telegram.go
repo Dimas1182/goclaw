@@ -8,8 +8,8 @@ import (
 	"time"
 
 	telegrambot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/smallnest/goclaw//bus"
-	"github.com/smallnest/goclaw//internal/logger"
+	"github.com/smallnest/goclaw/bus"
+	"github.com/smallnest/goclaw/internal/logger"
 	"go.uber.org/zap"
 )
 
