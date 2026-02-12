@@ -39,7 +39,7 @@ func NewDingTalkChannel(cfg config.DingTalkChannelConfig, bus *bus.MessageBus) (
 	}
 
 	return &DingTalkChannel{
-		BaseChannelImpl: NewBaseChannelImpl("dingtalk", baseCfg, bus),
+		BaseChannelImpl: NewBaseChannelImpl("dingtalk", "default", baseCfg, bus),
 		config:          cfg,
 		clientID:        cfg.ClientID,
 		clientSecret:    cfg.ClientSecret,

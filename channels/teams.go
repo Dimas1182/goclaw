@@ -41,7 +41,7 @@ func NewTeamsChannel(cfg TeamsConfig, bus *bus.MessageBus) (*TeamsChannel, error
 	}
 
 	return &TeamsChannel{
-		BaseChannelImpl: NewBaseChannelImpl("teams", cfg.BaseChannelConfig, bus),
+		BaseChannelImpl: NewBaseChannelImpl("teams", "default", cfg.BaseChannelConfig, bus),
 		appID:           cfg.AppID,
 		appPassword:     cfg.AppPassword,
 		tenantID:        cfg.TenantID,

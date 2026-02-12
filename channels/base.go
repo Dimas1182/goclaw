@@ -13,6 +13,9 @@ type BaseChannel interface {
 	// Name 返回通道名称
 	Name() string
 
+	// AccountID 返回通道账号ID
+	AccountID() string
+
 	// Start 启动通道
 	Start(ctx context.Context) error
 
@@ -32,32 +35,41 @@ type BaseChannel interface {
 // BaseChannelConfig 通道基础配置
 type BaseChannelConfig struct {
 	Enabled    bool     `mapstructure:"enabled" json:"enabled"`
+	AccountID  string   `mapstructure:"account_id" json:"account_id"` // 账号ID
+	Name       string   `mapstructure:"name" json:"name"`             // 账号显示名称
 	AllowedIDs []string `mapstructure:"allowed_ids" json:"allowed_ids"`
 }
 
 // BaseChannelImpl 通道基础实现
 type BaseChannelImpl struct {
-	name     string
-	config   BaseChannelConfig
-	bus      *bus.MessageBus
-	running  bool
-	stopChan chan struct{}
+	name      string
+	accountID string
+	config    BaseChannelConfig
+	bus       *bus.MessageBus
+	running   bool
+	stopChan  chan struct{}
 }
 
 // NewBaseChannelImpl 创建通道基础实现
-func NewBaseChannelImpl(name string, config BaseChannelConfig, bus *bus.MessageBus) *BaseChannelImpl {
+func NewBaseChannelImpl(name, accountID string, config BaseChannelConfig, bus *bus.MessageBus) *BaseChannelImpl {
 	return &BaseChannelImpl{
-		name:     name,
-		config:   config,
-		bus:      bus,
-		running:  false,
-		stopChan: make(chan struct{}),
+		name:      name,
+		accountID: accountID,
+		config:    config,
+		bus:       bus,
+		running:   false,
+		stopChan:  make(chan struct{}),
 	}
 }
 
 // Name 返回通道名称
 func (c *BaseChannelImpl) Name() string {
 	return c.name
+}
+
+// AccountID 返回通道账号ID
+func (c *BaseChannelImpl) AccountID() string {
+	return c.accountID
 }
 
 // Start 启动通道

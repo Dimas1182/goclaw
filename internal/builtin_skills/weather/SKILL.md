@@ -1,8 +1,16 @@
 ---
 name: weather
-description: Get current weather and forecasts (no API key required).
+description: This skill should be used when users ask for weather information, current conditions, or forecasts for any location worldwide. Use for queries like "weather in Beijing", "what's the weather today", "temperature in Tokyo", "forecast for London".
 homepage: https://wttr.in/:help
-metadata: { "goclaw": { "emoji": "🌤️", "requires": { "bins": ["curl"] } } }
+version: 1.0.0
+author: Ducc
+metadata:
+  openclaw:
+    emoji: 🌤️
+    always: false
+    requires:
+      bins: [curl]
+      os: [darwin, linux, windows]
 ---
 
 # Weather

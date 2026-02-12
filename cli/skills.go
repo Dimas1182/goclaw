@@ -11,6 +11,7 @@ import (
 
 	"github.com/smallnest/goclaw/agent"
 	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/internal"
 	"github.com/smallnest/goclaw/internal/logger"
 	"github.com/smallnest/goclaw/providers"
 	"github.com/spf13/cobra"
@@ -135,6 +136,11 @@ func init() {
 }
 
 func runSkillsList(cmd *cobra.Command, args []string) {
+	// 确保内置技能被复制到用户目录
+	if err := internal.EnsureBuiltinSkills(); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Failed to ensure builtin skills: %v\n", err)
+	}
+
 	// 加载配置
 	_, err := config.Load("")
 	if err != nil {
@@ -148,12 +154,10 @@ func runSkillsList(cmd *cobra.Command, args []string) {
 	}
 	defer func() { _ = logger.Sync() }()
 
-	// 创建工作区
-	workspace := os.Getenv("HOME") + "/.goclaw/workspace"
-	managedSkillsDir := os.Getenv("HOME") + "/.goclaw/skills"
-
-	// 创建技能加载器
-	skillsLoader := agent.NewSkillsLoader(workspace, []string{managedSkillsDir})
+	// 创建技能加载器（统一使用 ~/.goclaw/skills 目录）
+	goclawDir := os.Getenv("HOME") + "/.goclaw"
+	skillsDir := goclawDir + "/skills"
+	skillsLoader := agent.NewSkillsLoader(goclawDir, []string{skillsDir})
 	if err := skillsLoader.Discover(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to discover skills: %v\n", err)
 		os.Exit(1)
@@ -222,12 +226,10 @@ func runSkillsValidate(cmd *cobra.Command, args []string) {
 	}
 	defer func() { _ = logger.Sync() }()
 
-	// 创建工作区
-	workspace := os.Getenv("HOME") + "/.goclaw/workspace"
-	managedSkillsDir := os.Getenv("HOME") + "/.goclaw/skills"
-
-	// 创建技能加载器
-	skillsLoader := agent.NewSkillsLoader(workspace, []string{managedSkillsDir})
+	// 创建技能加载器（统一使用 ~/.goclaw/skills 目录）
+	goclawDir := os.Getenv("HOME") + "/.goclaw"
+	skillsDir := goclawDir + "/skills"
+	skillsLoader := agent.NewSkillsLoader(goclawDir, []string{skillsDir})
 	if err := skillsLoader.Discover(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to discover skills: %v\n", err)
 		os.Exit(1)
@@ -350,12 +352,10 @@ func runSkillsTest(cmd *cobra.Command, args []string) {
 	}
 	defer func() { _ = logger.Sync() }()
 
-	// 创建工作区
-	workspace := os.Getenv("HOME") + "/.goclaw/workspace"
-	managedSkillsDir := os.Getenv("HOME") + "/.goclaw/skills"
-
-	// 创建技能加载器
-	skillsLoader := agent.NewSkillsLoader(workspace, []string{managedSkillsDir})
+	// 创建技能加载器（统一使用 ~/.goclaw/skills 目录）
+	goclawDir := os.Getenv("HOME") + "/.goclaw"
+	skillsDir := goclawDir + "/skills"
+	skillsLoader := agent.NewSkillsLoader(goclawDir, []string{skillsDir})
 	if err := skillsLoader.Discover(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to discover skills: %v\n", err)
 		os.Exit(1)

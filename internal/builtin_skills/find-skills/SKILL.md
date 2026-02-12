@@ -8,7 +8,6 @@ metadata:
     emoji: 🔍
     always: false
     requires:
-      bins: [goclaw]
       os: [darwin, linux, windows]
 ---
 
@@ -74,14 +73,13 @@ goclaw skills test skill-name --prompt "your test prompt here"
 
 ## Skill Locations
 
-Skills are searched in these locations (in order):
+Skills are stored in a unified location:
 
 | Location | Description |
 |----------|-------------|
-| `~/.goclaw/skills` | User-level skills |
-| `<workspace>/.goclaw/skills` | Workspace-specific |
-| `<exe-path>/skills` | Bundled with binary |
-| `./skills` | Current directory (dev) |
+| `~/.goclaw/skills` | All skills (user-installed and built-in) |
+
+Built-in skills are automatically copied to this directory on first run.
 
 ---
 

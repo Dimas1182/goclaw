@@ -34,7 +34,7 @@ func NewSlackChannel(cfg SlackConfig, bus *bus.MessageBus) (*SlackChannel, error
 	}
 
 	return &SlackChannel{
-		BaseChannelImpl: NewBaseChannelImpl("slack", cfg.BaseChannelConfig, bus),
+		BaseChannelImpl: NewBaseChannelImpl("slack", "default", cfg.BaseChannelConfig, bus),
 		token:           cfg.Token,
 		signingSecret:   cfg.SigningSecret,
 	}, nil

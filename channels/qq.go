@@ -114,18 +114,19 @@ type ATMessageEventData struct {
 }
 
 // NewQQChannel 创建 QQ 官方 Bot 通道
-func NewQQChannel(cfg config.QQChannelConfig, bus *bus.MessageBus) (*QQChannel, error) {
+func NewQQChannel(accountID string, cfg config.QQChannelConfig, bus *bus.MessageBus) (*QQChannel, error) {
 	if cfg.AppID == "" || cfg.AppSecret == "" {
 		return nil, fmt.Errorf("qq app_id and app_secret are required")
 	}
 
 	baseCfg := BaseChannelConfig{
 		Enabled:    cfg.Enabled,
+		AccountID:  accountID,
 		AllowedIDs: cfg.AllowedIDs,
 	}
 
 	return &QQChannel{
-		BaseChannelImpl: NewBaseChannelImpl("qq-official", baseCfg, bus),
+		BaseChannelImpl: NewBaseChannelImpl("qq", accountID, baseCfg, bus),
 		appID:           cfg.AppID,
 		appSecret:       cfg.AppSecret,
 		msgSeqMap:       make(map[string]int64),
@@ -485,6 +486,7 @@ func (c *QQChannel) handleC2CMessage(data json.RawMessage) {
 	msg := &bus.InboundMessage{
 		ID:        event.ID,
 		Content:   event.Content,
+		AccountID: c.AccountID(),
 		SenderID:  senderID,
 		ChatID:    senderID,
 		Channel:   c.Name(),
@@ -515,6 +517,7 @@ func (c *QQChannel) handleGroupATMessage(data json.RawMessage) {
 	msg := &bus.InboundMessage{
 		ID:        event.ID,
 		Content:   event.Content,
+		AccountID: c.AccountID(),
 		SenderID:  senderID,
 		ChatID:    event.GroupOpenID,
 		Channel:   c.Name(),
@@ -547,6 +550,7 @@ func (c *QQChannel) handleChannelATMessage(data json.RawMessage) {
 	msg := &bus.InboundMessage{
 		ID:        event.ID,
 		Content:   event.Content,
+		AccountID: c.AccountID(),
 		SenderID:  senderID,
 		ChatID:    event.ChannelID,
 		Channel:   c.Name(),

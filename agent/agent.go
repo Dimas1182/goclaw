@@ -287,8 +287,8 @@ func (a *Agent) publishResponse(ctx context.Context, msg AgentMessage) {
 	content := extractTextContent(msg)
 
 	outbound := &bus.OutboundMessage{
-		Channel:   a.getCurrentChannel(),
-		ChatID:    a.getCurrentChatID(),
+		Channel:   a.GetCurrentChannel(),
+		ChatID:    a.GetCurrentChatID(),
 		Content:   content,
 		Timestamp: time.Now(),
 	}
@@ -412,14 +412,19 @@ func (a *Agent) SetTools(tools []Tool) {
 	a.state.Tools = tools
 }
 
-// getCurrentChannel returns the current output channel
-func (a *Agent) getCurrentChannel() string {
+// GetCurrentChannel returns the current output channel
+func (a *Agent) GetCurrentChannel() string {
 	return "cli"
 }
 
-// getCurrentChatID returns the current chat ID
-func (a *Agent) getCurrentChatID() string {
+// GetCurrentChatID returns the current chat ID
+func (a *Agent) GetCurrentChatID() string {
 	return "main"
+}
+
+// GetOrchestrator 获取 orchestrator（供 AgentManager 使用）
+func (a *Agent) GetOrchestrator() *Orchestrator {
+	return a.orchestrator
 }
 
 // Helper functions

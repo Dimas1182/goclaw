@@ -39,7 +39,7 @@ type Skill struct {
 				NodePkgs     []string `yaml:"nodePkgs"`     // Node.js包依赖
 			} `yaml:"requires"`
 			Install []SkillInstall `yaml:"install"`
-		} `yaml:"goclaw"`
+		} `yaml:"openclaw"`
 	} `yaml:"metadata"`
 	Requires SkillRequirements `yaml:"requires"` // 兼容旧格式
 	Content  string            `yaml:"-"`        // 技能内容（Markdown）
@@ -100,28 +100,8 @@ func (l *SkillsLoader) SetAutoInstall(enabled bool) {
 
 // Discover 发现技能
 func (l *SkillsLoader) Discover() error {
-	// 获取可执行文件路径
-	exePath, err := os.Executable()
-	var exeDir string
-	if err == nil {
-		exeDir = filepath.Dir(exePath)
-	}
-
-	// 默认技能目录
-	dirs := append(l.skillsDirs,
-		filepath.Join(l.workspace, "skills"),
-		filepath.Join(l.workspace, ".goclaw", "skills"),
-	)
-
-	// 添加可执行文件同级的 skills 目录
-	if exeDir != "" {
-		dirs = append(dirs, filepath.Join(exeDir, "skills"))
-	}
-
-	// 添加当前目录下的 skills 目录（开发调试用）
-	dirs = append(dirs, "skills")
-
-	for _, dir := range dirs {
+	// 只使用配置的技能目录（~/.goclaw/skills）
+	for _, dir := range l.skillsDirs {
 		if err := l.discoverInDir(dir); err != nil {
 			// 目录不存在是正常的，继续
 			if !os.IsNotExist(err) {

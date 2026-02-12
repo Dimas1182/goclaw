@@ -46,7 +46,7 @@ func NewGoogleChatChannel(cfg GoogleChatConfig, bus *bus.MessageBus) (*GoogleCha
 	}
 
 	return &GoogleChatChannel{
-		BaseChannelImpl: NewBaseChannelImpl("googlechat", cfg.BaseChannelConfig, bus),
+		BaseChannelImpl: NewBaseChannelImpl("googlechat", "default", cfg.BaseChannelConfig, bus),
 		projectID:       cfg.ProjectID,
 		credentials:     cfg.Credentials,
 		httpClient: &http.Client{

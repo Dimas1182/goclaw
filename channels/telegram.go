@@ -27,7 +27,7 @@ type TelegramConfig struct {
 }
 
 // NewTelegramChannel 创建 Telegram 通道
-func NewTelegramChannel(cfg TelegramConfig, bus *bus.MessageBus) (*TelegramChannel, error) {
+func NewTelegramChannel(accountID string, cfg TelegramConfig, bus *bus.MessageBus) (*TelegramChannel, error) {
 	if cfg.Token == "" {
 		return nil, fmt.Errorf("telegram token is required")
 	}
@@ -38,7 +38,7 @@ func NewTelegramChannel(cfg TelegramConfig, bus *bus.MessageBus) (*TelegramChann
 	}
 
 	return &TelegramChannel{
-		BaseChannelImpl: NewBaseChannelImpl("telegram", cfg.BaseChannelConfig, bus),
+		BaseChannelImpl: NewBaseChannelImpl("telegram", accountID, cfg.BaseChannelConfig, bus),
 		bot:             bot,
 		token:           cfg.Token,
 	}, nil
@@ -127,11 +127,12 @@ func (c *TelegramChannel) handleUpdate(ctx context.Context, update *telegrambot.
 
 	// 构建入站消息
 	msg := &bus.InboundMessage{
-		Channel:  c.Name(),
-		SenderID: senderID,
-		ChatID:   strconv.FormatInt(message.Chat.ID, 10),
-		Content:  content,
-		Media:    c.extractMedia(message),
+		Channel:   c.Name(),
+		AccountID: c.AccountID(),
+		SenderID:  senderID,
+		ChatID:    strconv.FormatInt(message.Chat.ID, 10),
+		Content:   content,
+		Media:     c.extractMedia(message),
 		Metadata: map[string]interface{}{
 			"message_id": message.MessageID,
 			"from_user":  message.From.UserName,

@@ -184,8 +184,10 @@ func runStart(cmd *cobra.Command, args []string) {
 	// 创建工具注册表
 	toolRegistry := agent.NewToolRegistry()
 
-	// 创建技能加载器
-	skillsLoader := agent.NewSkillsLoader(workspaceDir, []string{})
+	// 创建技能加载器（统一使用 ~/.goclaw/skills 目录）
+	goclawDir := os.Getenv("HOME") + "/.goclaw"
+	skillsDir := goclawDir + "/skills"
+	skillsLoader := agent.NewSkillsLoader(goclawDir, []string{skillsDir})
 	if err := skillsLoader.Discover(); err != nil {
 		logger.Warn("Failed to discover skills", zap.Error(err))
 	} else {
@@ -285,18 +287,18 @@ func runStart(cmd *cobra.Command, args []string) {
 	// 创建调度器
 	scheduler := cron.NewScheduler(messageBus, provider, sessionMgr)
 
-	// 创建 Agent
-	agentInstance, err := agent.NewAgent(&agent.NewAgentConfig{
-		Bus:          messageBus,
-		Provider:     provider,
-		SessionMgr:   sessionMgr,
-		Tools:        toolRegistry,
-		Context:      contextBuilder,
-		Workspace:    workspaceDir,
-		MaxIteration: cfg.Agents.Defaults.MaxIterations,
+	// 创建 AgentManager
+	agentManager := agent.NewAgentManager(&agent.NewAgentManagerConfig{
+		Bus:        messageBus,
+		Provider:   provider,
+		SessionMgr: sessionMgr,
+		Tools:      toolRegistry,
+		DataDir:    workspaceDir, // 使用 workspace 作为数据目录
 	})
-	if err != nil {
-		logger.Fatal("Failed to create agent", zap.Error(err))
+
+	// 从配置设置 Agent 和绑定
+	if err := agentManager.SetupFromConfig(cfg, contextBuilder); err != nil {
+		logger.Fatal("Failed to setup agent manager", zap.Error(err))
 	}
 
 	// 处理信号
@@ -331,10 +333,10 @@ func runStart(cmd *cobra.Command, args []string) {
 		}
 	}()
 
-	// 启动 Agent
+	// 启动 AgentManager
 	go func() {
-		if err := agentInstance.Start(ctx); err != nil {
-			logger.Error("Agent error", zap.Error(err))
+		if err := agentManager.Start(ctx); err != nil {
+			logger.Error("AgentManager error", zap.Error(err))
 		}
 	}()
 
@@ -342,9 +344,9 @@ func runStart(cmd *cobra.Command, args []string) {
 	<-sigChan
 	logger.Info("Received shutdown signal")
 
-	// 停止 Agent
-	if err := agentInstance.Stop(); err != nil {
-		logger.Error("Failed to stop agent", zap.Error(err))
+	// 停止 AgentManager
+	if err := agentManager.Stop(); err != nil {
+		logger.Error("Failed to stop agent manager", zap.Error(err))
 	}
 
 	logger.Info("goclaw agent stopped")

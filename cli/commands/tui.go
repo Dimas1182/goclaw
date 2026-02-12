@@ -15,6 +15,7 @@ import (
 	"github.com/smallnest/goclaw/bus"
 	"github.com/smallnest/goclaw/cli/input"
 	"github.com/smallnest/goclaw/config"
+	"github.com/smallnest/goclaw/internal"
 	"github.com/smallnest/goclaw/internal/logger"
 	"github.com/smallnest/goclaw/providers"
 	"github.com/smallnest/goclaw/session"
@@ -58,6 +59,11 @@ func TUICommand() *cobra.Command {
 
 // runTUI runs the terminal UI
 func runTUI(cmd *cobra.Command, args []string) {
+	// 确保内置技能被复制到用户目录
+	if err := internal.EnsureBuiltinSkills(); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Failed to ensure builtin skills: %v\n", err)
+	}
+
 	// Load configuration
 	cfg, err := config.Load("")
 	if err != nil {
@@ -162,10 +168,17 @@ func runTUI(cmd *cobra.Command, args []string) {
 	}
 	defer provider.Close()
 
-	// Create skills loader
-	skillsLoader := agent.NewSkillsLoader(workspace, []string{})
+	// Create skills loader（统一使用 ~/.goclaw/skills 目录）
+	goclawDir := os.Getenv("HOME") + "/.goclaw"
+	skillsDir := goclawDir + "/skills"
+	skillsLoader := agent.NewSkillsLoader(goclawDir, []string{skillsDir})
 	if err := skillsLoader.Discover(); err != nil {
 		logger.Warn("Failed to discover skills", zap.Error(err))
+	} else {
+		skills := skillsLoader.List()
+		if len(skills) > 0 {
+			logger.Info("Skills loaded", zap.Int("count", len(skills)))
+		}
 	}
 
 	// Always create a new session (unless explicitly specified)
@@ -194,6 +207,48 @@ func runTUI(cmd *cobra.Command, args []string) {
 	// Create command registry for slash commands
 	cmdRegistry := NewCommandRegistry()
 	cmdRegistry.SetSessionManager(sessionMgr)
+	cmdRegistry.SetToolGetter(func() (map[string]interface{}, error) {
+		// 从 toolRegistry 获取工具信息
+		existingTools := toolRegistry.List()
+		result := make(map[string]interface{})
+		for _, tool := range existingTools {
+			result[tool.Name()] = map[string]interface{}{
+				"name":        tool.Name(),
+				"description": tool.Description(),
+				"parameters": tool.Parameters(),
+			}
+		}
+		return result, nil
+	})
+
+	cmdRegistry.SetSkillsGetter(func() ([]*SkillInfo, error) {
+		// 从 skillsLoader 获取技能信息
+		agentSkills := skillsLoader.List()
+		result := make([]*SkillInfo, 0, len(agentSkills))
+		for _, skill := range agentSkills {
+			skillInfo := &SkillInfo{
+				Name:        skill.Name,
+				Description: skill.Description,
+				Version:     skill.Version,
+				Author:      skill.Author,
+				Homepage:    skill.Homepage,
+				Always:      skill.Always,
+				Emoji:       skill.Metadata.OpenClaw.Emoji,
+			}
+			// 转换缺失依赖信息
+			if skill.MissingDeps != nil {
+				skillInfo.MissingDeps = &MissingDepsInfo{
+					Bins:       skill.MissingDeps.Bins,
+					AnyBins:    skill.MissingDeps.AnyBins,
+					Env:        skill.MissingDeps.Env,
+					PythonPkgs: skill.MissingDeps.PythonPkgs,
+					NodePkgs:   skill.MissingDeps.NodePkgs,
+				}
+			}
+			result = append(result, skillInfo)
+		}
+		return result, nil
+	})
 
 	// Handle message flag
 	if tuiMessage != "" {
@@ -374,7 +429,18 @@ func runAgentIteration(
 				zap.Strings("failed_tools", failedTools))
 		}
 
-		messages := contextBuilder.BuildMessages(history, errorGuidance, skills, loadedSkills)
+		// 如果有错误指导，追加到最后一条用户消息中
+		if errorGuidance != "" && len(history) > 0 {
+			// 找到最后一条用户消息并追加错误指导
+			for i := len(history) - 1; i >= 0; i-- {
+				if history[i].Role == "user" {
+					history[i].Content += errorGuidance
+					break
+				}
+			}
+		}
+
+		messages := contextBuilder.BuildMessages(history, "", skills, loadedSkills)
 		providerMessages := make([]providers.Message, len(messages))
 		for i, msg := range messages {
 			var tcs []providers.ToolCall

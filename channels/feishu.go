@@ -49,7 +49,7 @@ func NewFeishuChannel(cfg config.FeishuChannelConfig, bus *bus.MessageBus) (*Fei
 	}
 
 	return &FeishuChannel{
-		BaseChannelImpl:   NewBaseChannelImpl("feishu", baseCfg, bus),
+		BaseChannelImpl:   NewBaseChannelImpl("feishu", "default", baseCfg, bus),
 		appID:             cfg.AppID,
 		appSecret:         cfg.AppSecret,
 		encryptKey:        cfg.EncryptKey,

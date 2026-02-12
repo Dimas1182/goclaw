@@ -58,7 +58,7 @@ func NewWeWorkChannel(cfg config.WeWorkChannelConfig, bus *bus.MessageBus) (*WeW
 	}
 
 	return &WeWorkChannel{
-		BaseChannelImpl: NewBaseChannelImpl("wework", baseCfg, bus),
+		BaseChannelImpl: NewBaseChannelImpl("wework", "default", baseCfg, bus),
 		corpID:          cfg.CorpID,
 		agentID:         cfg.AgentID,
 		secret:          cfg.Secret,

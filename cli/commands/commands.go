@@ -38,11 +38,34 @@ type ArgSpec struct {
 
 // CommandRegistry 命令注册表
 type CommandRegistry struct {
-	commands   map[string]*Command
-	homeDir    string
-	menuMode   bool // 是否在菜单选择模式
-	sessionMgr *session.Manager
-	stopped    bool // 停止标志，用于中止正在运行的 agent
+	commands    map[string]*Command
+	homeDir     string
+	menuMode    bool // 是否在菜单选择模式
+	sessionMgr  *session.Manager
+	stopped     bool // 停止标志，用于中止正在运行的 agent
+	toolGetter  func() (map[string]interface{}, error) // 获取工具列表的函数
+	skillsGetter func() ([]*SkillInfo, error)         // 获取技能列表的函数
+}
+
+// SkillInfo 技能信息
+type SkillInfo struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Version     string   `json:"version"`
+	Author      string   `json:"author"`
+	Homepage    string   `json:"homepage"`
+	Always      bool     `json:"always"`
+	Emoji       string   `json:"emoji"`
+	MissingDeps *MissingDepsInfo `json:"missing_deps,omitempty"`
+}
+
+// MissingDepsInfo 缺失依赖信息
+type MissingDepsInfo struct {
+	Bins       []string `json:"bins,omitempty"`
+	AnyBins    []string `json:"any_bins,omitempty"`
+	Env        []string `json:"env,omitempty"`
+	PythonPkgs []string `json:"python_pkgs,omitempty"`
+	NodePkgs   []string `json:"node_pkgs,omitempty"`
 }
 
 // NewCommandRegistry 创建命令注册表
@@ -59,6 +82,16 @@ func NewCommandRegistry() *CommandRegistry {
 // SetSessionManager 设置会话管理器
 func (r *CommandRegistry) SetSessionManager(mgr *session.Manager) {
 	r.sessionMgr = mgr
+}
+
+// SetToolGetter 设置工具获取函数
+func (r *CommandRegistry) SetToolGetter(getter func() (map[string]interface{}, error)) {
+	r.toolGetter = getter
+}
+
+// SetSkillsGetter 设置技能获取函数
+func (r *CommandRegistry) SetSkillsGetter(getter func() ([]*SkillInfo, error)) {
+	r.skillsGetter = getter
 }
 
 // GetSessionManager 获取会话管理器
@@ -240,6 +273,26 @@ func (r *CommandRegistry) registerBuiltInCommands() {
 		Description: "Show session and gateway status",
 		Handler: func(args []string) (string, bool) {
 			return r.handleStatus(args), false
+		},
+	})
+
+	// /tools - 显示可用工具
+	r.Register(&Command{
+		Name:        "tools",
+		Usage:       "/tools",
+		Description: "List available tools",
+		Handler: func(args []string) (string, bool) {
+			return r.handleTools(args), false
+		},
+	})
+
+	// /skills - 显示可用技能
+	r.Register(&Command{
+		Name:        "skills",
+		Usage:       "/skills [search]",
+		Description: "List available skills or search for a skill",
+		Handler: func(args []string) (string, bool) {
+			return r.handleSkills(args), false
 		},
 	})
 
@@ -642,7 +695,7 @@ func (r *CommandRegistry) NewCompleter() readline.AutoCompleter {
 // GetCommandPrompt 获取命令提示信息
 func (r *CommandRegistry) GetCommandPrompt() string {
 	var sb strings.Builder
-	sb.WriteString("Available commands: /quit /exit /clear /clear-sessions /help /status /stop /read /cd /pwd /ls (Tab to show menu)")
+	sb.WriteString("Available commands: /quit /exit /clear /clear-sessions /help /status /tools /skills /stop /read /cd /pwd /ls (Tab to show menu)")
 	return sb.String()
 }
 
@@ -688,3 +741,290 @@ func (r *CommandRegistry) GetCommandListAsText() string {
 	}
 	return sb.String()
 }
+
+// handleTools 处理 tools 命令
+func (r *CommandRegistry) handleTools(args []string) string {
+	var sb strings.Builder
+	sb.WriteString("=== Available Tools ===\n\n")
+
+	if r.toolGetter == nil {
+		sb.WriteString("Tool registry not available. Please start the agent first.\n")
+		return sb.String()
+	}
+
+	tools, err := r.toolGetter()
+	if err != nil {
+		sb.WriteString(fmt.Sprintf("Error fetching tools: %v\n", err))
+		return sb.String()
+	}
+
+	if len(tools) == 0 {
+		sb.WriteString("No tools registered.\n")
+		return sb.String()
+	}
+
+	// 分类工具
+	coreTools := []string{}
+	fileTools := []string{}
+	webTools := []string{}
+	browserTools := []string{}
+	otherTools := []string{}
+
+	for name, tool := range tools {
+		toolMap, ok := tool.(map[string]interface{})
+		if !ok {
+			otherTools = append(otherTools, name)
+			continue
+		}
+
+		desc := "No description"
+		if d, ok := toolMap["description"].(string); ok {
+			desc = d
+		}
+
+		toolEntry := fmt.Sprintf("  %-20s  %s", name, desc)
+
+		// 简单分类
+		if strings.Contains(name, "read") || strings.Contains(name, "write") || strings.Contains(name, "exec") || strings.Contains(name, "file") {
+			fileTools = append(fileTools, toolEntry)
+		} else if strings.Contains(name, "web") || strings.Contains(name, "search") {
+			webTools = append(webTools, toolEntry)
+		} else if strings.Contains(name, "browser") {
+			browserTools = append(browserTools, toolEntry)
+		} else if strings.Contains(name, "spawn") {
+			coreTools = append(coreTools, toolEntry)
+		} else {
+			otherTools = append(otherTools, toolEntry)
+		}
+	}
+
+	// 按分类显示
+	if len(coreTools) > 0 {
+		sb.WriteString("Core:\n")
+		for _, t := range coreTools {
+			sb.WriteString(t + "\n")
+		}
+		sb.WriteString("\n")
+	}
+
+	if len(fileTools) > 0 {
+		sb.WriteString("File System:\n")
+		for _, t := range fileTools {
+			sb.WriteString(t + "\n")
+		}
+		sb.WriteString("\n")
+	}
+
+	if len(webTools) > 0 {
+		sb.WriteString("Web:\n")
+		for _, t := range webTools {
+			sb.WriteString(t + "\n")
+		}
+		sb.WriteString("\n")
+	}
+
+	if len(browserTools) > 0 {
+		sb.WriteString("Browser:\n")
+		for _, t := range browserTools {
+			sb.WriteString(t + "\n")
+		}
+		sb.WriteString("\n")
+	}
+
+	if len(otherTools) > 0 {
+		sb.WriteString("Other:\n")
+		for _, t := range otherTools {
+			sb.WriteString(t + "\n")
+		}
+		sb.WriteString("\n")
+	}
+
+	sb.WriteString(fmt.Sprintf("Total: %d tools\n", len(tools)))
+
+	return sb.String()
+}
+
+// handleSkills 处理 skills 命令
+func (r *CommandRegistry) handleSkills(args []string) string {
+	var sb strings.Builder
+
+	// 如果有搜索参数，执行搜索
+	if len(args) > 0 {
+		return r.searchSkills(strings.Join(args, " "))
+	}
+
+	sb.WriteString("=== Available Skills ===\n\n")
+
+	if r.skillsGetter == nil {
+		sb.WriteString("Skills registry not available. Please start the agent first.\n")
+		return sb.String()
+	}
+
+	skills, err := r.skillsGetter()
+	if err != nil {
+		sb.WriteString(fmt.Sprintf("Error fetching skills: %v\n", err))
+		return sb.String()
+	}
+
+	if len(skills) == 0 {
+		sb.WriteString("No skills registered.\n")
+		return sb.String()
+	}
+
+	// 分类技能
+	alwaysSkills := []*SkillInfo{}
+	otherSkills := []*SkillInfo{}
+
+	for _, skill := range skills {
+		if skill.Always {
+			alwaysSkills = append(alwaysSkills, skill)
+		} else {
+			otherSkills = append(otherSkills, skill)
+		}
+	}
+
+	// 显示始终加载的技能
+	if len(alwaysSkills) > 0 {
+		sb.WriteString("Always Loaded:\n")
+		for _, s := range alwaysSkills {
+			skillEntry := r.formatSkillEntry(s)
+			sb.WriteString(skillEntry + "\n")
+		}
+		sb.WriteString("\n")
+	}
+
+	// 显示其他技能
+	if len(otherSkills) > 0 {
+		sb.WriteString("Available:\n")
+		for _, s := range otherSkills {
+			skillEntry := r.formatSkillEntry(s)
+			sb.WriteString(skillEntry + "\n")
+		}
+		sb.WriteString("\n")
+	}
+
+	sb.WriteString(fmt.Sprintf("Total: %d skills\n", len(skills)))
+	sb.WriteString("\nUse /skills <keyword> to search for specific skills.\n")
+
+	return sb.String()
+}
+
+// searchSkills 搜索技能
+func (r *CommandRegistry) searchSkills(query string) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("=== Search Results: \"%s\" ===\n\n", query))
+
+	if r.skillsGetter == nil {
+		sb.WriteString("Skills registry not available.\n")
+		return sb.String()
+	}
+
+	skills, err := r.skillsGetter()
+	if err != nil {
+		sb.WriteString(fmt.Sprintf("Error fetching skills: %v\n", err))
+		return sb.String()
+	}
+
+	if len(skills) == 0 {
+		sb.WriteString("No skills available.\n")
+		return sb.String()
+	}
+
+	query = strings.ToLower(query)
+	results := []*SkillInfo{}
+
+	for _, skill := range skills {
+		score := 0.0
+		matches := []string{}
+
+		// 检查名称匹配
+		if strings.Contains(strings.ToLower(skill.Name), query) {
+			if strings.EqualFold(skill.Name, query) {
+				score += 1.0
+				matches = append(matches, "name (exact)")
+			} else {
+				score += 0.8
+				matches = append(matches, "name")
+			}
+		}
+
+		// 检查描述匹配
+		if strings.Contains(strings.ToLower(skill.Description), query) {
+			score += 0.6
+			matches = append(matches, "description")
+		}
+
+		// 检查作者匹配
+		if strings.Contains(strings.ToLower(skill.Author), query) {
+			score += 0.4
+			matches = append(matches, "author")
+		}
+
+		if score > 0 {
+			results = append(results, skill)
+		}
+	}
+
+	if len(results) == 0 {
+		sb.WriteString("No matching skills found.\n")
+		return sb.String()
+	}
+
+	sb.WriteString(fmt.Sprintf("Found %d skill(s):\n\n", len(results)))
+	for _, s := range results {
+		skillEntry := r.formatSkillEntry(s)
+		sb.WriteString(skillEntry + "\n")
+	}
+
+	return sb.String()
+}
+
+// formatSkillEntry 格式化技能条目
+func (r *CommandRegistry) formatSkillEntry(skill *SkillInfo) string {
+	var sb strings.Builder
+
+	// Emoji + 名称
+	emoji := skill.Emoji
+	if emoji == "" {
+		emoji = "📦"
+	}
+	sb.WriteString(fmt.Sprintf("  %s %-25s", emoji, skill.Name))
+
+	// 描述
+	if skill.Description != "" {
+		// 截断过长的描述
+		desc := skill.Description
+		if len(desc) > 50 {
+			desc = desc[:50] + "..."
+		}
+		sb.WriteString(fmt.Sprintf("  %s", desc))
+	}
+
+	// 版本
+	if skill.Version != "" {
+		sb.WriteString(fmt.Sprintf("  [%s]", skill.Version))
+	}
+
+	// 缺失依赖标记
+	if skill.MissingDeps != nil && r.hasMissingDeps(skill.MissingDeps) {
+		sb.WriteString("  [⚠️]")
+	}
+
+	// 始终加载标记
+	if skill.Always {
+		sb.WriteString("  [★]")
+	}
+
+	return sb.String()
+}
+
+// hasMissingDeps 检查是否有缺失依赖
+func (r *CommandRegistry) hasMissingDeps(deps *MissingDepsInfo) bool {
+	if deps == nil {
+		return false
+	}
+	return len(deps.Bins) > 0 || len(deps.AnyBins) > 0 ||
+		len(deps.PythonPkgs) > 0 || len(deps.NodePkgs) > 0 ||
+		len(deps.Env) > 0
+}
+

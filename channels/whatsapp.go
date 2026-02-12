@@ -30,7 +30,7 @@ type WhatsAppConfig struct {
 // NewWhatsAppChannel 创建 WhatsApp 通道
 func NewWhatsAppChannel(cfg WhatsAppConfig, bus *bus.MessageBus) (*WhatsAppChannel, error) {
 	return &WhatsAppChannel{
-		BaseChannelImpl: NewBaseChannelImpl("whatsapp", cfg.BaseChannelConfig, bus),
+		BaseChannelImpl: NewBaseChannelImpl("whatsapp", "default", cfg.BaseChannelConfig, bus),
 		bridgeURL:       cfg.BridgeURL,
 		client: &http.Client{
 			Timeout: 30 * time.Second,

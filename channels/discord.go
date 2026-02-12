@@ -32,7 +32,7 @@ func NewDiscordChannel(cfg DiscordConfig, bus *bus.MessageBus) (*DiscordChannel,
 	}
 
 	return &DiscordChannel{
-		BaseChannelImpl: NewBaseChannelImpl("discord", cfg.BaseChannelConfig, bus),
+		BaseChannelImpl: NewBaseChannelImpl("discord", "default", cfg.BaseChannelConfig, bus),
 		token:           cfg.Token,
 	}, nil
 }

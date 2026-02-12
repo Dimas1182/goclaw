@@ -192,62 +192,194 @@ func (m *Manager) DispatchOutbound(ctx context.Context) error {
 
 // SetupFromConfig 从配置设置通道
 func (m *Manager) SetupFromConfig(cfg *config.Config) error {
-	// Telegram 通道
-	if cfg.Channels.Telegram.Enabled && cfg.Channels.Telegram.Token != "" {
-		tgCfg := TelegramConfig{
-			BaseChannelConfig: BaseChannelConfig{
-				Enabled:    cfg.Channels.Telegram.Enabled,
-				AllowedIDs: cfg.Channels.Telegram.AllowedIDs,
-			},
-			Token: cfg.Channels.Telegram.Token,
-		}
+	// 1. 优先使用新的多账号配置格式
+	// 2. 如果没有账号配置，则回退到旧的配置格式
 
-		channel, err := NewTelegramChannel(tgCfg, m.bus)
-		if err != nil {
-			logger.Error("Failed to create Telegram channel", zap.Error(err))
-		} else {
-			if err := m.Register(channel); err != nil {
-				logger.Error("Failed to register Telegram channel", zap.Error(err))
+	// Telegram 通道
+	if cfg.Channels.Telegram.Enabled {
+		if len(cfg.Channels.Telegram.Accounts) > 0 {
+			// 多账号配置
+			for accountID, accountCfg := range cfg.Channels.Telegram.Accounts {
+				if accountCfg.Enabled && accountCfg.Token != "" {
+					tgCfg := TelegramConfig{
+						BaseChannelConfig: BaseChannelConfig{
+							Enabled:    accountCfg.Enabled,
+							AccountID:  accountID,
+							Name:       accountCfg.Name,
+							AllowedIDs: accountCfg.AllowedIDs,
+						},
+						Token: accountCfg.Token,
+					}
+
+					channel, err := NewTelegramChannel(accountID, tgCfg, m.bus)
+					if err != nil {
+						logger.Error("Failed to create Telegram channel",
+							zap.String("account_id", accountID),
+							zap.Error(err))
+					} else {
+						channelName := buildChannelName("telegram", accountID)
+						if err := m.RegisterWithName(channel, channelName); err != nil {
+							logger.Error("Failed to register Telegram channel",
+								zap.String("account_id", accountID),
+								zap.Error(err))
+						} else {
+							logger.Info("Telegram channel registered",
+								zap.String("account_id", accountID),
+								zap.String("name", channelName))
+						}
+					}
+				}
+			}
+		} else if cfg.Channels.Telegram.Token != "" {
+			// 单账号配置（向后兼容）
+			tgCfg := TelegramConfig{
+				BaseChannelConfig: BaseChannelConfig{
+					Enabled:    cfg.Channels.Telegram.Enabled,
+					AccountID:  "default",
+					AllowedIDs: cfg.Channels.Telegram.AllowedIDs,
+				},
+				Token: cfg.Channels.Telegram.Token,
+			}
+
+			channel, err := NewTelegramChannel("default", tgCfg, m.bus)
+			if err != nil {
+				logger.Error("Failed to create Telegram channel", zap.Error(err))
+			} else {
+				if err := m.Register(channel); err != nil {
+					logger.Error("Failed to register Telegram channel", zap.Error(err))
+				}
 			}
 		}
 	}
 
 	// WhatsApp 通道
-	if cfg.Channels.WhatsApp.Enabled && cfg.Channels.WhatsApp.BridgeURL != "" {
-		waCfg := WhatsAppConfig{
-			BaseChannelConfig: BaseChannelConfig{
-				Enabled:    cfg.Channels.WhatsApp.Enabled,
-				AllowedIDs: cfg.Channels.WhatsApp.AllowedIDs,
-			},
-			BridgeURL: cfg.Channels.WhatsApp.BridgeURL,
-		}
+	if cfg.Channels.WhatsApp.Enabled {
+		if len(cfg.Channels.WhatsApp.Accounts) > 0 {
+			// 多账号配置
+			for accountID, accountCfg := range cfg.Channels.WhatsApp.Accounts {
+				if accountCfg.Enabled && accountCfg.BridgeURL != "" {
+					waCfg := WhatsAppConfig{
+						BaseChannelConfig: BaseChannelConfig{
+							Enabled:    accountCfg.Enabled,
+							AccountID:  accountID,
+							Name:       accountCfg.Name,
+							AllowedIDs: accountCfg.AllowedIDs,
+						},
+						BridgeURL: accountCfg.BridgeURL,
+					}
 
-		channel, err := NewWhatsAppChannel(waCfg, m.bus)
-		if err != nil {
-			logger.Error("Failed to create WhatsApp channel", zap.Error(err))
-		} else {
-			if err := m.Register(channel); err != nil {
-				logger.Error("Failed to register WhatsApp channel", zap.Error(err))
+					channel, err := NewWhatsAppChannel(waCfg, m.bus)
+					if err != nil {
+						logger.Error("Failed to create WhatsApp channel",
+							zap.String("account_id", accountID),
+							zap.Error(err))
+					} else {
+						channelName := buildChannelName("whatsapp", accountID)
+						if err := m.RegisterWithName(channel, channelName); err != nil {
+							logger.Error("Failed to register WhatsApp channel",
+								zap.String("account_id", accountID),
+								zap.Error(err))
+						}
+					}
+				}
+			}
+		} else if cfg.Channels.WhatsApp.BridgeURL != "" {
+			// 单账号配置（向后兼容）
+			waCfg := WhatsAppConfig{
+				BaseChannelConfig: BaseChannelConfig{
+					Enabled:    cfg.Channels.WhatsApp.Enabled,
+					AccountID:  "default",
+					AllowedIDs: cfg.Channels.WhatsApp.AllowedIDs,
+				},
+				BridgeURL: cfg.Channels.WhatsApp.BridgeURL,
+			}
+
+			channel, err := NewWhatsAppChannel(waCfg, m.bus)
+			if err != nil {
+				logger.Error("Failed to create WhatsApp channel", zap.Error(err))
+			} else {
+				if err := m.Register(channel); err != nil {
+					logger.Error("Failed to register WhatsApp channel", zap.Error(err))
+				}
 			}
 		}
 	}
 
 	// 飞书通道
-	if cfg.Channels.Feishu.Enabled && cfg.Channels.Feishu.AppID != "" {
-		channel, err := NewFeishuChannel(cfg.Channels.Feishu, m.bus)
-		if err != nil {
-			logger.Error("Failed to create Feishu channel", zap.Error(err))
-		} else {
-			if err := m.Register(channel); err != nil {
-				logger.Error("Failed to register Feishu channel", zap.Error(err))
+	if cfg.Channels.Feishu.Enabled {
+		if len(cfg.Channels.Feishu.Accounts) > 0 {
+			// 多账号配置
+			for accountID, accountCfg := range cfg.Channels.Feishu.Accounts {
+				if accountCfg.Enabled && accountCfg.AppID != "" {
+					fsCfg := config.FeishuChannelConfig{
+						Enabled:           accountCfg.Enabled,
+						AppID:             accountCfg.AppID,
+						AppSecret:         accountCfg.AppSecret,
+						AllowedIDs:        accountCfg.AllowedIDs,
+					}
+					channel, err := NewFeishuChannel(fsCfg, m.bus)
+					if err != nil {
+						logger.Error("Failed to create Feishu channel",
+							zap.String("account_id", accountID),
+							zap.Error(err))
+					} else {
+						channelName := buildChannelName("feishu", accountID)
+						if err := m.RegisterWithName(channel, channelName); err != nil {
+							logger.Error("Failed to register Feishu channel",
+								zap.String("account_id", accountID),
+								zap.Error(err))
+						}
+					}
+				}
+			}
+		} else if cfg.Channels.Feishu.AppID != "" {
+			// 单账号配置（向后兼容）
+			channel, err := NewFeishuChannel(cfg.Channels.Feishu, m.bus)
+			if err != nil {
+				logger.Error("Failed to create Feishu channel", zap.Error(err))
+			} else {
+				if err := m.Register(channel); err != nil {
+					logger.Error("Failed to register Feishu channel", zap.Error(err))
+				}
 			}
 		}
 	}
 
 	// QQ 通道 (使用官方 API)
 	if cfg.Channels.QQ.Enabled {
-		if cfg.Channels.QQ.AppID != "" {
-			channel, err := NewQQChannel(cfg.Channels.QQ, m.bus)
+		if len(cfg.Channels.QQ.Accounts) > 0 {
+			// 多账号配置
+			for accountID, accountCfg := range cfg.Channels.QQ.Accounts {
+				if accountCfg.Enabled && accountCfg.AppID != "" {
+					qqCfg := config.QQChannelConfig{
+						Enabled:    accountCfg.Enabled,
+						AppID:      accountCfg.AppID,
+						AppSecret:  accountCfg.AppSecret,
+						AllowedIDs: accountCfg.AllowedIDs,
+					}
+
+					channel, err := NewQQChannel(accountID, qqCfg, m.bus)
+					if err != nil {
+						logger.Error("Failed to create QQ channel",
+							zap.String("account_id", accountID),
+							zap.Error(err))
+					} else {
+						channelName := buildChannelName("qq", accountID)
+						if err := m.RegisterWithName(channel, channelName); err != nil {
+							logger.Error("Failed to register QQ channel",
+								zap.String("account_id", accountID),
+								zap.Error(err))
+						} else {
+							logger.Info("QQ channel registered",
+								zap.String("account_id", accountID),
+								zap.String("name", channelName))
+						}
+					}
+				}
+			}
+		} else if cfg.Channels.QQ.AppID != "" {
+			// 单账号配置（向后兼容）
+			channel, err := NewQQChannel("default", cfg.Channels.QQ, m.bus)
 			if err != nil {
 				logger.Error("Failed to create QQ channel", zap.Error(err))
 			} else {
@@ -255,34 +387,111 @@ func (m *Manager) SetupFromConfig(cfg *config.Config) error {
 					logger.Error("Failed to register QQ channel", zap.Error(err))
 				}
 			}
-		} else {
-			logger.Warn("QQ channel enabled but app_id not configured")
 		}
 	}
 
 	// 企业微信通道
-	if cfg.Channels.WeWork.Enabled && cfg.Channels.WeWork.CorpID != "" {
-		channel, err := NewWeWorkChannel(cfg.Channels.WeWork, m.bus)
-		if err != nil {
-			logger.Error("Failed to create WeWork channel", zap.Error(err))
-		} else {
-			if err := m.Register(channel); err != nil {
-				logger.Error("Failed to register WeWork channel", zap.Error(err))
+	if cfg.Channels.WeWork.Enabled {
+		if len(cfg.Channels.WeWork.Accounts) > 0 {
+			// 多账号配置
+			for accountID, accountCfg := range cfg.Channels.WeWork.Accounts {
+				if accountCfg.Enabled && accountCfg.CorpID != "" {
+					wwCfg := config.WeWorkChannelConfig{
+						Enabled:        accountCfg.Enabled,
+						CorpID:         accountCfg.CorpID,
+						AgentID:        accountCfg.AgentID,
+						Secret:         accountCfg.AppSecret,
+						AllowedIDs:     accountCfg.AllowedIDs,
+					}
+					channel, err := NewWeWorkChannel(wwCfg, m.bus)
+					if err != nil {
+						logger.Error("Failed to create WeWork channel",
+							zap.String("account_id", accountID),
+							zap.Error(err))
+					} else {
+						channelName := buildChannelName("wework", accountID)
+						if err := m.RegisterWithName(channel, channelName); err != nil {
+							logger.Error("Failed to register WeWork channel",
+								zap.String("account_id", accountID),
+								zap.Error(err))
+						}
+					}
+				}
+			}
+		} else if cfg.Channels.WeWork.CorpID != "" {
+			// 单账号配置（向后兼容）
+			channel, err := NewWeWorkChannel(cfg.Channels.WeWork, m.bus)
+			if err != nil {
+				logger.Error("Failed to create WeWork channel", zap.Error(err))
+			} else {
+				if err := m.Register(channel); err != nil {
+					logger.Error("Failed to register WeWork channel", zap.Error(err))
+				}
 			}
 		}
 	}
 
 	// 钉钉通道
-	if cfg.Channels.DingTalk.Enabled && cfg.Channels.DingTalk.ClientID != "" {
-		channel, err := NewDingTalkChannel(cfg.Channels.DingTalk, m.bus)
-		if err != nil {
-			logger.Error("Failed to create DingTalk channel", zap.Error(err))
-		} else {
-			if err := m.Register(channel); err != nil {
-				logger.Error("Failed to register DingTalk channel", zap.Error(err))
+	if cfg.Channels.DingTalk.Enabled {
+		if len(cfg.Channels.DingTalk.Accounts) > 0 {
+			// 多账号配置
+			for accountID, accountCfg := range cfg.Channels.DingTalk.Accounts {
+				if accountCfg.Enabled && accountCfg.ClientID != "" {
+					dtCfg := config.DingTalkChannelConfig{
+						Enabled:       accountCfg.Enabled,
+						ClientID:      accountCfg.ClientID,
+						ClientSecret:  accountCfg.ClientSecret,
+						AllowedIDs:    accountCfg.AllowedIDs,
+					}
+					channel, err := NewDingTalkChannel(dtCfg, m.bus)
+					if err != nil {
+						logger.Error("Failed to create DingTalk channel",
+							zap.String("account_id", accountID),
+							zap.Error(err))
+					} else {
+						channelName := buildChannelName("dingtalk", accountID)
+						if err := m.RegisterWithName(channel, channelName); err != nil {
+							logger.Error("Failed to register DingTalk channel",
+								zap.String("account_id", accountID),
+								zap.Error(err))
+						}
+					}
+				}
+			}
+		} else if cfg.Channels.DingTalk.ClientID != "" {
+			// 单账号配置（向后兼容）
+			channel, err := NewDingTalkChannel(cfg.Channels.DingTalk, m.bus)
+			if err != nil {
+				logger.Error("Failed to create DingTalk channel", zap.Error(err))
+			} else {
+				if err := m.Register(channel); err != nil {
+					logger.Error("Failed to register DingTalk channel", zap.Error(err))
+				}
 			}
 		}
 	}
 
+	return nil
+}
+
+// buildChannelName 构建通道名称
+func buildChannelName(channelType, accountID string) string {
+	if accountID == "" || accountID == "default" {
+		return channelType
+	}
+	return channelType + ":" + accountID
+}
+
+// RegisterWithName 使用指定名称注册通道
+func (m *Manager) RegisterWithName(channel BaseChannel, name string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if _, ok := m.channels[name]; ok {
+		return fmt.Errorf("channel %s already registered", name)
+	}
+
+	m.channels[name] = channel
+	logger.Info("Channel registered", zap.String("channel", name))
 	return nil
 }

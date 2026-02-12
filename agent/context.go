@@ -124,7 +124,7 @@ func (b *ContextBuilder) buildIdentityAndTools() string {
 		"run_shell":              "Run shell commands (supports timeout and error handling)",
 		"web_search":             "Search the web using API",
 		"web_fetch":              "Fetch web pages",
-		"use_skill":              "Select and load a skill for specialized tasks",
+		"use_skill":              "Load a specialized skill. SKILLS HAVE HIGHEST PRIORITY - always check Skills section first before using other tools",
 	}
 
 	// 构建工具列表
@@ -163,12 +163,19 @@ If a task is more complex or takes longer, use smart_search first, then browser 
 
 ## CRITICAL RULES
 
-1. For ANY search request ("search for", "find", "google search", etc.): IMMEDIATELY call smart_search tool. DO NOT provide manual instructions or advice.
-2. When the user asks for information: USE YOUR TOOLS to get it. Do NOT explain how to get it.
-3. DO NOT tell the user "I cannot" or "here's how to do it yourself". ACTUALLY DO IT with tools.
-4. If you have tools available for a task, use them. No permission needed for safe operations.
-5. **NEVER HALLUCINATE SEARCH RESULTS**: When presenting search results, ONLY use the exact data returned by the tool. If no results were found, clearly state that no results were found.
-6. When a tool fails: analyze the error, try an alternative approach (different tool, different parameters, or different method) WITHOUT asking the user unless absolutely necessary.`,
+**Skill-First Workflow (HIGHEST PRIORITY):**
+1. **ALWAYS check the Skills section first** before using any other tools
+2. If a matching skill is found, use the use_skill tool with the skill name
+3. If no matching skill: use built-in tools or command tools of os
+4. Only after checking skills should you proceed with built-in tools
+
+**General Rules:**
+5. For ANY search request ("search for", "find", "google search", etc.): IMMEDIATELY call smart_search tool. DO NOT provide manual instructions or advice.
+6. When the user asks for information: USE YOUR TOOLS to get it. Do NOT explain how to get it.
+7. DO NOT tell the user "I cannot" or "here's how to do it yourself". ACTUALLY DO IT with tools.
+8. If you have tools available for a task, use them. No permission needed for safe operations.
+9. **NEVER HALLUCINATE SEARCH RESULTS**: When presenting search results, ONLY use the exact data returned by the tool. If no results were found, clearly state that no results were found.
+10. When a tool fails: analyze the error, try an alternative approach (different tool, different parameters, or different method) WITHOUT asking the user unless absolutely necessary.`,
 		now.Format("2006-01-02 15:04:05 MST"),
 		b.workspace,
 		strings.Join(toolLines, "\n"))
@@ -346,7 +353,7 @@ func (b *ContextBuilder) buildSkillsPrompt(skills []*Skill, mode PromptMode) str
 	sb.WriteString("Before replying: scan <available_skills> entries.\n")
 	sb.WriteString("- If exactly one skill clearly applies: output a tool call `use_skill` with the skill name as parameter.\n")
 	sb.WriteString("- If multiple could apply: choose the most specific one, then call `use_skill`.\n")
-	sb.WriteString("- If none clearly apply: do not use any skill.\n")
+	sb.WriteString("- If no matching skill: use built-in tools or command tools of os.\n")
 	sb.WriteString("Constraints: only use one skill at a time; the skill content will be injected after selection.\n\n")
 
 	for _, skill := range skills {
