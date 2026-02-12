@@ -463,8 +463,17 @@ func (m *AgentManager) handleInboundMessage(ctx context.Context, msg *bus.Inboun
 	historyAgentMsgs := sessionMessagesToAgentMessages(history)
 	allMessages := append(historyAgentMsgs, agentMsg)
 
+	logger.Info("About to call orchestrator.Run",
+		zap.String("session_key", sessionKey),
+		zap.Int("history_count", len(history)),
+		zap.Int("all_messages_count", len(allMessages)))
+
 	// 执行 Agent
 	finalMessages, err := orchestrator.Run(ctx, allMessages)
+	logger.Info("orchestrator.Run returned",
+		zap.String("session_key", sessionKey),
+		zap.Int("final_messages_count", len(finalMessages)),
+		zap.Error(err))
 	if err != nil {
 		// Check if error is related to tool_call_id mismatch (old session format)
 		errStr := err.Error()
