@@ -275,13 +275,11 @@ func (a *Agent) updateSession(sess *session.Session, messages []AgentMessage) {
 		if msg.Role == RoleAssistant {
 			for _, block := range msg.Content {
 				if tc, ok := block.(ToolCallContent); ok {
-					sessMsg.ToolCalls = []session.ToolCall{
-						{
-							ID:     tc.ID,
-							Name:   tc.Name,
-							Params: tc.Arguments,
-						},
-					}
+					sessMsg.ToolCalls = append(sessMsg.ToolCalls, session.ToolCall{
+						ID:     tc.ID,
+						Name:   tc.Name,
+						Params: tc.Arguments,
+					})
 				}
 			}
 		}
@@ -290,6 +288,13 @@ func (a *Agent) updateSession(sess *session.Session, messages []AgentMessage) {
 		if msg.Role == RoleToolResult {
 			if id, ok := msg.Metadata["tool_call_id"].(string); ok {
 				sessMsg.ToolCallID = id
+			}
+			// Preserve tool_name in metadata for validation
+			if toolName, ok := msg.Metadata["tool_name"].(string); ok {
+				if sessMsg.Metadata == nil {
+					sessMsg.Metadata = make(map[string]interface{})
+				}
+				sessMsg.Metadata["tool_name"] = toolName
 			}
 		}
 

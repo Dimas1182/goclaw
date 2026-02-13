@@ -401,9 +401,11 @@ func processTUIDialogue(
 			if msg.Role == "assistant" {
 				for _, block := range msg.Content {
 					if tc, ok := block.(agent.ToolCallContent); ok {
-						sessMsg.ToolCalls = []session.ToolCall{
-							{ID: tc.ID, Name: tc.Name, Params: convertToMapParams(tc.Arguments)},
-						}
+						sessMsg.ToolCalls = append(sessMsg.ToolCalls, session.ToolCall{
+							ID:     tc.ID,
+							Name:   tc.Name,
+							Params: convertToMapParams(tc.Arguments),
+						})
 					}
 				}
 			}
@@ -413,6 +415,13 @@ func processTUIDialogue(
 				if id, ok := msg.Metadata["tool_call_id"].(string); ok {
 					sessMsg.ToolCallID = id
 					sessMsg.Role = "tool"
+				}
+				// Preserve tool_name in metadata for validation
+				if toolName, ok := msg.Metadata["tool_name"].(string); ok {
+					if sessMsg.Metadata == nil {
+						sessMsg.Metadata = make(map[string]interface{})
+					}
+					sessMsg.Metadata["tool_name"] = toolName
 				}
 			}
 
